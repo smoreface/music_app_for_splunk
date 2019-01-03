@@ -1,0 +1,590 @@
+<dashboard>
+  <label>2018 Music</label>
+  <row>
+    <panel>
+      <title>Top 10 Artists of 2018</title>
+      <chart>
+        <search>
+          <query>`lastfm` | dedup uts | timechart count(artist) by artist useother=f usenull=f| sort -count(artist) limit=10</query>
+          <earliest>1514793600</earliest>
+          <latest>1546329600</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.abbreviation">none</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.abbreviation">none</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.abbreviation">none</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">area</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">stacked</option>
+        <option name="charting.chart.style">minimal</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.mode">standard</option>
+        <option name="charting.legend.placement">right</option>
+        <option name="charting.lineWidth">2</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="trellis.enabled">0</option>
+        <option name="trellis.scales.shared">1</option>
+        <option name="trellis.size">medium</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Top 10 Artists</title>
+      <table>
+        <search>
+          <query>`lastfm` |stats count(artist) as listens by artist | sort -listens limit=10</query>
+          <earliest>1514793600</earliest>
+          <latest>1546329600</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">100</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="percentagesRow">false</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+    <panel>
+      <title>Top 10 Songs</title>
+      <table>
+        <search>
+          <query>`lastfm` |dedup uts |stats count(track_name) as listens by track_name,artist | sort -listens limit=10</query>
+          <earliest>1514793600</earliest>
+          <latest>1546329600</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">100</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">cell</option>
+        <option name="percentagesRow">false</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+        <drilldown>
+          <set token="track_name">$click.value2$</set>
+          <set token="artist">$click.value2$</set>
+        </drilldown>
+      </table>
+    </panel>
+    <panel>
+      <title>Top 10 Albums</title>
+      <table>
+        <search>
+          <query>`lastfm` |stats count(album) as listens by album,artist | sort -listens limit=10</query>
+          <earliest>1514793600</earliest>
+          <latest>1546329600</latest>
+        </search>
+        <option name="count">10</option>
+        <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>iTunes Metadata About Selection</title>
+      <table>
+        <search>
+          <query>`itunes` (artist="$artist$" OR track_name="$track_name$") | eval length=round('track_length'/1000), len=tostring(length, "duration") | rex field=len "00:(?&lt;l&gt;\d*:\d*)"| replace "00:" WITH "" IN l | rename l as track_length | table artist, track_name, album, genre,rating, date_added, Kind, track_length</query>
+          <earliest>0</earliest>
+          <latest></latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">100</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">cell</option>
+        <option name="percentagesRow">false</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Total Listens</title>
+      <single>
+        <search>
+          <query>`lastfm` | stats count</query>
+          <earliest>1514793600</earliest>
+          <latest>1546329600</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="colorBy">value</option>
+        <option name="colorMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="numberPrecision">0</option>
+        <option name="rangeColors">["0x53a051","0x0877a6","0xf8be34","0xf1813f","0xdc4e41"]</option>
+        <option name="rangeValues">[0,30,70,100]</option>
+        <option name="showSparkline">1</option>
+        <option name="showTrendIndicator">1</option>
+        <option name="trellis.enabled">0</option>
+        <option name="trellis.scales.shared">1</option>
+        <option name="trellis.size">medium</option>
+        <option name="trendColorInterpretation">standard</option>
+        <option name="trendDisplayMode">absolute</option>
+        <option name="unit">listens</option>
+        <option name="unitPosition">after</option>
+        <option name="useColors">0</option>
+        <option name="useThousandSeparators">1</option>
+      </single>
+    </panel>
+    <panel>
+      <title>Minutes Listened to iTunes Library Songs</title>
+      <single>
+        <search>
+          <query>`lastfm` | fields track_name | lookup itunestracklength.csv track_name OUTPUT track_length,ui_track_length | search track_length=* | stats sum(track_length) as total_duration_ms | eval total_mins=round('total_duration_ms'/60000), yr_mins=round('total_mins'/525600, 5) | fields total_mins</query>
+          <earliest>1514793600</earliest>
+          <latest>1546329600</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="colorBy">value</option>
+        <option name="colorMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="numberPrecision">0</option>
+        <option name="rangeColors">["0x53a051","0x0877a6","0xf8be34","0xf1813f","0xdc4e41"]</option>
+        <option name="rangeValues">[0,30,70,100]</option>
+        <option name="showSparkline">1</option>
+        <option name="showTrendIndicator">1</option>
+        <option name="trellis.enabled">0</option>
+        <option name="trellis.scales.shared">1</option>
+        <option name="trellis.size">medium</option>
+        <option name="trendColorInterpretation">standard</option>
+        <option name="trendDisplayMode">absolute</option>
+        <option name="unit">minutes</option>
+        <option name="unitPosition">after</option>
+        <option name="useColors">0</option>
+        <option name="useThousandSeparators">1</option>
+      </single>
+    </panel>
+    <panel>
+      <title>Songs Purchased in 2018</title>
+      <single>
+        <search>
+          <query>`itunes` Kind="Purchased *" | stats count</query>
+          <earliest>1514793600</earliest>
+          <latest>1546329600</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="colorBy">value</option>
+        <option name="colorMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="numberPrecision">0</option>
+        <option name="rangeColors">["0x53a051","0x0877a6","0xf8be34","0xf1813f","0xdc4e41"]</option>
+        <option name="rangeValues">[0,30,70,100]</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="showSparkline">1</option>
+        <option name="showTrendIndicator">1</option>
+        <option name="trellis.enabled">0</option>
+        <option name="trellis.scales.shared">1</option>
+        <option name="trellis.size">medium</option>
+        <option name="trendColorInterpretation">standard</option>
+        <option name="trendDisplayMode">absolute</option>
+        <option name="unit">songs</option>
+        <option name="unitPosition">after</option>
+        <option name="useColors">0</option>
+        <option name="useThousandSeparators">1</option>
+      </single>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Top 20 Artists Discovered in 2018</title>
+      <table>
+        <search>
+          <query>`lastfm_earliest` | search earliestyear=2018 | stats count sparkline(count,30d) as listenspattern  by artist | sort -count limit=20 | lookup earliestlistens.csv artist OUTPUTNEW earliestlisten as first_discovered | eval first_discovered=strftime(first_discovered, "%B %d, %Y %H:%M:%S")</query>
+          <earliest>0</earliest>
+          <latest></latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">20</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="percentagesRow">false</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Venues Visited for the First Time in 2018</title>
+      <table>
+        <search>
+          <query>| inputlookup concerts.csv | convert timeformat="%B %d %Y" mktime(date)  AS _time | eventstats count by venue,city,state  | search _time&gt;1514764800 | search count=1 | sort _time | table venue,city,state,date</query>
+          <earliest>-1y@y</earliest>
+          <latest>@y</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">20</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="percentagesRow">false</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Total Spent on Concerts Attended in 2018</title>
+      <single>
+        <search>
+          <query>|inputlookup ticketpurchase.csv | convert timeformat="%B %d %Y" mktime(concert_date)  AS _time | search _time&gt;1514764800 | eval cost=coalesce(cost, face_value) | table artist,cost,face_value | search [|inputlookup concerts.csv | makemv artist delim="," | mvexpand artist| table artist] | stats sum(cost)</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="colorBy">value</option>
+        <option name="colorMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="numberPrecision">0.00</option>
+        <option name="rangeColors">["0x53a051","0x0877a6","0xf8be34","0xf1813f","0xdc4e41"]</option>
+        <option name="rangeValues">[0,30,70,100]</option>
+        <option name="showSparkline">1</option>
+        <option name="showTrendIndicator">1</option>
+        <option name="trellis.enabled">0</option>
+        <option name="trellis.scales.shared">1</option>
+        <option name="trellis.size">medium</option>
+        <option name="trendColorInterpretation">standard</option>
+        <option name="trendDisplayMode">absolute</option>
+        <option name="unit">$</option>
+        <option name="unitPosition">before</option>
+        <option name="useColors">0</option>
+        <option name="useThousandSeparators">1</option>
+      </single>
+    </panel>
+    <panel>
+      <title>Total Concerts in 2018</title>
+      <single>
+        <search>
+          <query>|inputlookup concerts.csv | convert timeformat="%B %d %Y" mktime(date)  AS _time | search _time&gt;1514764800 | stats count</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="colorBy">value</option>
+        <option name="colorMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="numberPrecision">0</option>
+        <option name="rangeColors">["0x53a051","0x0877a6","0xf8be34","0xf1813f","0xdc4e41"]</option>
+        <option name="rangeValues">[0,30,70,100]</option>
+        <option name="showSparkline">1</option>
+        <option name="showTrendIndicator">1</option>
+        <option name="trellis.enabled">0</option>
+        <option name="trellis.scales.shared">1</option>
+        <option name="trellis.size">medium</option>
+        <option name="trendColorInterpretation">standard</option>
+        <option name="trendDisplayMode">absolute</option>
+        <option name="unit">concerts</option>
+        <option name="unitPosition">after</option>
+        <option name="useColors">0</option>
+        <option name="useThousandSeparators">1</option>
+      </single>
+    </panel>
+    <panel>
+      <title>Artists Seen in Concert in 2018</title>
+      <single>
+        <search>
+          <query>|inputlookup concerts.csv | convert timeformat="%B %d %Y" mktime(date)  AS _time | search _time&gt;1514764800 |makemv artist delim="," | mvexpand artist | stats count</query>
+          <earliest>1514793600</earliest>
+          <latest>1546329600</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="colorBy">value</option>
+        <option name="colorMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="numberPrecision">0</option>
+        <option name="rangeColors">["0x53a051","0x0877a6","0xf8be34","0xf1813f","0xdc4e41"]</option>
+        <option name="rangeValues">[0,30,70,100]</option>
+        <option name="showSparkline">1</option>
+        <option name="showTrendIndicator">1</option>
+        <option name="trellis.enabled">0</option>
+        <option name="trellis.scales.shared">1</option>
+        <option name="trellis.size">medium</option>
+        <option name="trendColorInterpretation">standard</option>
+        <option name="trendDisplayMode">absolute</option>
+        <option name="unit">artists</option>
+        <option name="unitPosition">after</option>
+        <option name="useColors">0</option>
+        <option name="useThousandSeparators">1</option>
+      </single>
+    </panel>
+    <panel>
+      <title>Total Spent on Concert Tickets in 2018</title>
+      <single>
+        <search>
+          <query>|inputlookup ticketpurchase.csv | convert timeformat="%B %d %Y" mktime(purchase_date)  AS _time | search _time&gt;1514764800 | eval cost=coalesce(cost, face_value) | table artist,cost,face_value | stats sum(cost)</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="colorBy">value</option>
+        <option name="colorMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="numberPrecision">0.00</option>
+        <option name="rangeColors">["0x53a051","0x0877a6","0xf8be34","0xf1813f","0xdc4e41"]</option>
+        <option name="rangeValues">[0,30,70,100]</option>
+        <option name="showSparkline">1</option>
+        <option name="showTrendIndicator">1</option>
+        <option name="trellis.enabled">0</option>
+        <option name="trellis.scales.shared">1</option>
+        <option name="trellis.size">medium</option>
+        <option name="trendColorInterpretation">standard</option>
+        <option name="trendDisplayMode">absolute</option>
+        <option name="unit">$</option>
+        <option name="unitPosition">before</option>
+        <option name="useColors">0</option>
+        <option name="useThousandSeparators">1</option>
+      </single>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Number of concerts per month</title>
+      <chart>
+        <search>
+          <query>|inputlookup concerts.csv | convert timeformat="%B %d %Y" mktime(date)  AS _time | search _time&gt;1514764800 | timechart span=1mon count</query>
+          <earliest>1514793600</earliest>
+          <latest>1546329600</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.abbreviation">none</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.abbreviation">none</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.abbreviation">none</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">column</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.mode">standard</option>
+        <option name="charting.legend.placement">right</option>
+        <option name="charting.lineWidth">2</option>
+        <option name="trellis.enabled">0</option>
+        <option name="trellis.scales.shared">1</option>
+        <option name="trellis.size">medium</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Number of artists seen live by month</title>
+      <chart>
+        <search>
+          <query>|inputlookup concerts.csv | convert timeformat="%B %d %Y" mktime(date)  AS _time | search _time&gt;1514764800 |makemv artist delim="," | mvexpand artist | timechart span=1mon count(artist)</query>
+          <earliest>1514793600</earliest>
+          <latest>1546329600</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.abbreviation">none</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.abbreviation">none</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.abbreviation">none</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">column</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.mode">standard</option>
+        <option name="charting.legend.placement">right</option>
+        <option name="charting.lineWidth">2</option>
+        <option name="trellis.enabled">0</option>
+        <option name="trellis.scales.shared">1</option>
+        <option name="trellis.size">medium</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Artists seen live in 2018</title>
+      <table>
+        <search>
+          <query>|inputlookup concerts.csv | convert timeformat="%B %d %Y" mktime(date)  AS _time | search _time&gt;1514764800 | makemv artist delim="," | mvexpand artist</query>
+          <earliest>1514793600</earliest>
+          <latest>1546329600</latest>
+        </search>
+        <option name="count">10</option>
+        <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Artists seen more than once in concert</title>
+      <table>
+        <search>
+          <query>|inputlookup concerts.csv | convert timeformat="%B %d %Y" mktime(date)  AS _time | search _time&gt;1514764800 |makemv artist delim="," | mvexpand artist | stats count(artist) as artistcount by artist  | sort -artistcount | search artistcount&gt;1</query>
+          <earliest>1514793600</earliest>
+          <latest>1546329600</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">20</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="percentagesRow">false</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+    <panel>
+      <title>Venues Visited in 2018</title>
+      <table>
+        <search>
+          <query>| inputlookup concerts.csv | convert timeformat="%B %d %Y" mktime(date)  AS _time | search _time&gt;1514764800 | stats count by venue,city,state | sort -count</query>
+          <earliest>-1y@y</earliest>
+          <latest>@y</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">20</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="percentagesRow">false</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Listens and First Discovery for my Spotify Top 100 Songs</title>
+      <table>
+        <search>
+          <query>`lastfm` | lookup spotify2018 track_name,artist OUTPUT track_name,artist, track_link | lookup earliesttracklistens.csv track_name,artist OUTPUTNEW earliestlisten as first_discovered | fields artist,track_name,first_discovered | eval first_discovered=strftime(first_discovered, "%B %d, %Y %H:%M:%S") | stats count by track_name, artist,first_discovered | sort -count | dedup track_name,artist</query>
+          <earliest>1514793600</earliest>
+          <latest>1546329600</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">20</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="percentagesRow">false</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+    <panel>
+      <title>Top 100 songs according to Spotify</title>
+      <table>
+        <search>
+          <query>|inputlookup spotify2018 | fields track_name,artist, track_link</query>
+          <earliest>1514793600</earliest>
+          <latest>1546329600</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">20</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="percentagesRow">false</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Bands discovered in 2018</title>
+      <table>
+        <search>
+          <query>`lastfm_earliest` | search earliestyear=2018 | stats count sparkline(count,30d) as listenspattern  by artist | where count &gt; 10 | lookup earliestlistens.csv artist OUTPUTNEW earliestlisten as first_discovered | sort first_discovered | eval first_discovered=strftime(first_discovered, "%B %d, %Y %H:%M:%S")</query>
+          <earliest>0</earliest>
+          <latest></latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">100</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="percentagesRow">false</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Top 10 Songs 2018 - Bonus Metadata</title>
+      <table>
+        <search>
+          <query>`lastfm` |stats count(track_name) as listens sparkline(count,30d) as listenspattern by track_name,artist,album | lookup earliesttracklistens.csv track_name,artist OUTPUTNEW track_name,earliestlisten as first_discovered | eval first_discovered=strftime(first_discovered, "%B %d, %Y %H:%M:%S") | sort -listens limit=10</query>
+          <earliest>1514793600</earliest>
+          <latest>1546329600</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">20</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="percentagesRow">false</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+  </row>
+</dashboard>
