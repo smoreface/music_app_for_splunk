@@ -1,0 +1,54 @@
+<form>
+  <label>ML Music</label>
+  <description>Machine learning and music</description>
+  <fieldset submitButton="false">
+    <input type="time" token="field1">
+      <label></label>
+      <default>
+        <earliest>-30d@d</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <title>Song Listen Outliers</title>
+      <table>
+        <search>
+          <query>`lastfm` |dedup uts
+|  stats count(track_name) by track_name, artist | anomalydetection "count(track_name)" action=annotate | eval isOutlier = if(probable_cause != "", "1", "0") | where isOutlier=1 | table artist, track_name, "count(track_name)" | sort -count(track_name)</query>
+          <earliest>$field1.earliest$</earliest>
+          <latest>$field1.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">100</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="percentagesRow">false</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+    <panel>
+      <title>Top Song Listens</title>
+      <table>
+        <search>
+          <query>`lastfm` | dedup uts | stats count(track_name) by artist, track_name |sort -count(track_name) limit=20</query>
+          <earliest>$field1.earliest$</earliest>
+          <latest>$field1.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">100</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="percentagesRow">false</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+  </row>
+</form>

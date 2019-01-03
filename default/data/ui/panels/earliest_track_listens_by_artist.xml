@@ -1,0 +1,16 @@
+<panel>
+  <title>Earliest Track Listens By Artist</title>
+  <table>
+    <search>
+      <query>index=music artist="VHS Collection" |convert ctime(_time) as date |stats earliest(date) by track_name |sort track_name</query>
+      <sampleRatio>1</sampleRatio>
+    </search>
+    <option name="count">100</option>
+    <option name="dataOverlayMode">none</option>
+    <option name="drilldown">cell</option>
+    <option name="percentagesRow">false</option>
+    <option name="rowNumbers">false</option>
+    <option name="totalsRow">false</option>
+    <option name="wrap">true</option>
+  </table>
+</panel>

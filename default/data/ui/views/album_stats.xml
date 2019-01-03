@@ -1,0 +1,22 @@
+<dashboard>
+  <label>Album Stats</label>
+  <row>
+    <panel>
+      <title>Album Cover Display WIP</title>
+      <table>
+        <search>
+          <query>`lastfm` | search artist="Death Cab For Cutie" | stats values(album.image) as album_cover, count by album | dedup album | search album_cover!="" | mvexpand album_cover | search album_cover="*300x300*" | sort -count</query>
+          <earliest>0</earliest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">20</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="percentagesRow">false</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+  </row>
+</dashboard>

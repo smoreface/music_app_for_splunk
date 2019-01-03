@@ -1,0 +1,226 @@
+[]
+access = read : [ * ], write : [ admin, power ]
+export = none
+
+[tags]
+export = system
+
+[props]
+export = system
+
+[transforms]
+export = system
+
+[lookups]
+export = system
+
+[viewstates]
+access = read : [ * ], write : [ * ]
+export = system
+
+[savedsearches/Artists%20Discovered%20in%202018]
+owner = admin
+
+[savedsearches/Earliest%20Listens%20with%20MBID%20-%20Lookup%20Gen%20Clone]
+access = read : [ * ], write : [ admin, power ]
+export = none
+owner = admin
+
+[macros/concert_time]
+access = read : [ * ], write : [ * ]
+export = system
+owner = admin
+
+[macros/get_headliners]
+export = none
+owner = admin
+
+[macros/lastfm]
+access = read : [ * ], write : [ * ]
+export = system
+owner = admin
+
+[macros/lastfm_earliest]
+export = system
+owner = admin
+
+[macros/makeartist]
+export = system
+owner = admin
+
+[macros/lastfm_earliest_mbid]
+export = system
+owner = admin
+
+[macros/lastfm_earlier]
+export = system
+owner = admin
+
+[views/concert_statistics]
+owner = admin
+
+[views/top_of_all_time]
+access = read : [ * ], write : [ admin, power ]
+export = system
+owner = admin
+
+[views/splunk_songs]
+access = read : [ * ], write : [ admin, power ]
+export = system
+owner = admin
+
+[views/music]
+access = read : [ * ], write : [ * ]
+export = system
+owner = admin
+
+[views/music_stats]
+owner = admin
+
+[views/itunes_stats]
+owner = admin
+
+[lookups/concerts.csv]
+access = read : [ * ], write : [ * ]
+export = system
+owner = nobody
+
+[views/listen_habit_stats]
+owner = admin
+
+[views/more_concert_statistics]
+owner = admin
+
+[views/college_listening_diversity]
+owner = admin
+
+[props/lastfm_json/EXTRACT-track_name]
+access = read : [ * ], write : [ * ]
+owner = admin
+
+[props/itunes/REPORT-itunes]
+export = system
+owner = admin
+
+[props/lastfmbackfill/REPORT-lastfmbackfill]
+access = read : [ * ], write : [ admin ]
+owner = admin
+
+[props/scrobble/REPORT-lastfmscrobble]
+export = system
+owner = admin
+
+[transforms/REPORT-lastfmbackfill]
+owner = admin
+
+[props/itunes_xml/FIELDALIAS-iTunes_xml_Normie]
+export = system
+owner = admin
+
+
+[views/2017_music]
+export = system
+owner = admin
+
+[views/listening_habits_over_time]
+export = system
+owner = admin
+
+[views/ml_music]
+export = system
+owner = admin
+
+[views/music_wip]
+owner = admin
+
+[views/upcoming_concerts]
+export = system
+owner = admin
+
+[views/year_music]
+export = system
+owner = admin
+
+[savedsearches/Old%20Bands]
+export = system
+owner = admin
+
+[views/album_stats]
+owner = admin
+
+[panels/artists_ive_seen_in_concert_more_than_once]
+access = read : [ * ], write : [ admin, power ]
+export = system
+owner = admin
+
+[panels/artists_to_see_live]
+owner = admin
+
+[panels/average_difference_in_days_between_date_added_and_first_listen]
+owner = admin
+
+[panels/bands_discovered]
+owner = admin
+
+[panels/earliest_track_listens_by_artist]
+owner = admin
+
+[panels/average_difference_in_days_between_date_added_and_first_listen_when_date_added_was_first]
+export = system
+owner = admin
+
+[panels/average_difference_in_days_between_date_added_and_first_listen_where_first_listen_was_first]
+export = system
+owner = admin
+
+[panels/concert_attendance_trend]
+export = system
+owner = admin
+
+[panels/concert_listen_threshold]
+export = system
+owner = admin
+
+[panels/concerts]
+export = system
+owner = admin
+
+[panels/concerts_attended]
+export = system
+owner = admin
+
+[panels/concerts_attended_over_time]
+export = system
+owner = admin
+
+[panels/how_many_itunes_songs_have_what_play_count]
+export = system
+owner = admin
+
+[savedsearches/Track%20BPM%20-%20Lookup%20Gen]
+access = read : [ * ], write : [ admin, power ]
+export = system
+owner = admin
+
+[views/dance_music_analysis]
+export = system
+owner = admin
+
+[panels/average_difference_in_days_between_date_added_and_first_listen_column_chart_frequency]
+owner = admin
+
+[datamodels/Music]
+export = none
+owner = admin
+
+[models/Music]
+export = none
+owner = admin
+
+[macros/drop_dataset%281%29]
+export = none
+owner = admin
+
+[savedsearches/Track%20Release%20Date%20-%20Lookup%20Gen]
+export = none
+owner = admin

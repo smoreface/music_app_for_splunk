@@ -1,0 +1,164 @@
+<form>
+  <label>Music Stats Over Time</label>
+  <fieldset submitButton="false"></fieldset>
+  <row>
+    <panel>
+      <title>Top 20 Artists of Last Year by Listens</title>
+      <chart>
+        <search>
+          <query>`lastfm` | dedup uts | timechart span=1mon count(artist) by artist useother=f usenull=f| sort -count(artist) limit=20</query>
+          <earliest>-1y@y</earliest>
+          <latest>@y</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">area</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">stacked</option>
+        <option name="charting.chart.style">minimal</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">right</option>
+        <option name="refresh.display">progressbar</option>
+        <drilldown>
+          <set token="artist">$click.name2$</set>
+          <link target="_blank">search?q=sourcetype=lastfmbackfill  artist="$artist$" | stats count(track_name) by artist track_name album | sort -count(track_name)&amp;earliest=$earliest$&amp;latest=$latest$</link>
+        </drilldown>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Listens Over Time - Artists I've Seen Live</title>
+      <input type="dropdown" token="artist" searchWhenChanged="true">
+        <label>Artist</label>
+        <initialValue>Hey Rosetta!</initialValue>
+        <fieldForLabel>artist</fieldForLabel>
+        <fieldForValue>artist</fieldForValue>
+        <search>
+          <query>|inputlookup concerts.csv | makemv artist delim="," | mvexpand artist | dedup artist | sort artist</query>
+          <earliest>0</earliest>
+          <latest></latest>
+        </search>
+      </input>
+      <chart>
+        <search type="annotation">
+          <query>|inputlookup concerts.csv | makemv artist delim="," | mvexpand artist | search artist="$artist$" | eval _time=strptime(date, "%B %d %Y") | eval annotation_label="$artist$ at ".venue </query>
+          <earliest>0</earliest>
+          <latest></latest>
+        </search>
+        <search>
+          <query>`lastfm` | search artist="$artist$" | timechart count</query>
+          <earliest>0</earliest>
+          <latest></latest>
+        </search>
+        <option name="charting.chart">area</option>
+        <option name="charting.drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Concerts Attended Over Time</title>
+      <chart>
+        <search>
+          <query>| inputlookup concerthistoryparse.csv | convert timeformat="%B %d %Y" mktime(date)  AS _time | timechart span=1mon count</query>
+          <earliest>-1y@y</earliest>
+          <latest>@y</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">column</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">minimal</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">right</option>
+        <option name="refresh.display">progressbar</option>
+        <drilldown>
+          <set token="clicktime">$click.value$</set>
+          <link target="_blank">search?q=| inputlookup concerthistoryparse.csv | eval _time = strptime(date,"%B %d %Y") | eval month = strftime(_time,"%m") | eval year = strftime(_time,"%Y") | eval clickmonth = strftime($clicktime$,"%m") | eval clickyear = strftime($clicktime$,"%Y") | where month=clickmonth and year=clickyear</link>
+        </drilldown>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel ref="top_songs_seit_moving_to_california" app="search"></panel>
+  </row>
+  <row>
+    <panel>
+      <title>Top 10 Artists Year to Date</title>
+      <chart>
+        <search>
+          <query>`lastfm` | dedup uts | timechart span=1mon count(artist) by artist useother=f usenull=f| sort -count(artist) limit=10</query>
+          <earliest>@y</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.abbreviation">none</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.abbreviation">none</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.abbreviation">none</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">area</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">stacked</option>
+        <option name="charting.chart.style">minimal</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.mode">standard</option>
+        <option name="charting.legend.placement">right</option>
+        <option name="charting.lineWidth">2</option>
+        <option name="trellis.enabled">0</option>
+        <option name="trellis.scales.shared">1</option>
+        <option name="trellis.size">medium</option>
+      </chart>
+    </panel>
+  </row>
+</form>

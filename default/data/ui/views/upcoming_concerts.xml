@@ -1,0 +1,22 @@
+<dashboard>
+  <label>Upcoming Concerts</label>
+  <row>
+    <panel>
+      <title>Upcoming Concerts &gt; Threshold (Unfiltered)</title>
+      <table>
+        <search>
+          <query>index=main sourcetype=songkick | table concert_name concert_venue concert_citystate concert_datetime</query>
+          <earliest>0</earliest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">100</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="percentagesRow">false</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+  </row>
+</dashboard>

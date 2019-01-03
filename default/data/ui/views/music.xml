@@ -1,0 +1,110 @@
+<form>
+  <label>Music Inputs</label>
+  <fieldset submitButton="false">
+    <input type="text" token="artist">
+      <label>artist</label>
+      <prefix>"</prefix>
+      <suffix>"</suffix>
+      <initialValue>*</initialValue>
+      <default>Geographer</default>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <title>Earliest Track Listens By Artist : $artist$</title>
+      <table>
+        <search>
+          <query>`lastfm` | search artist=$artist$ |stats earliest(_time) AS earliestlisten by artist track_name | fieldformat earliestlisten = strftime(earliestlisten, " %m/%d/%Y %H:%M:%S") |sort earliestlisten</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">100</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">cell</option>
+        <option name="percentagesRow">false</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+    <panel>
+      <title>Top Listens by Artist: $artist$</title>
+      <table>
+        <search>
+          <query>`lastfm` | search artist=$artist$ | stats count(track_name) as listens by track_name album artist | sort -listens</query>
+          <earliest>0</earliest>
+          <latest></latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">100</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="percentagesRow">false</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Favorite Albums By Artist: $artist$</title>
+      <table>
+        <search>
+          <query>`lastfm` | search artist=$artist$ | stats count by album | sort -count</query>
+          <earliest>0</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="count">10</option>
+        <option name="drilldown">none</option>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Bands discovered in $year$</title>
+      <input type="dropdown" token="year" searchWhenChanged="true">
+        <label>Artists discovered in this year</label>
+        <choice value="2018">2018</choice>
+        <choice value="2017">2017</choice>
+        <choice value="2016">2016</choice>
+        <choice value="2015">2015</choice>
+        <choice value="2014">2014</choice>
+        <choice value="2013">2013</choice>
+        <choice value="2012">2012</choice>
+        <choice value="2011">2011</choice>
+        <choice value="2010">2010</choice>
+        <choice value="2009">2009</choice>
+        <choice value="2008">2008</choice>
+        <choice value="2007">2007</choice>
+        <choice value="2006">2006</choice>
+        <choice value="2005">2005</choice>
+        <choice value="2004">2004</choice>
+        <choice value="2003">2003</choice>
+        <choice value="2002">2002</choice>
+        <choice value="2001">2001</choice>
+        <choice value="2000">2000</choice>
+        <default>2017</default>
+      </input>
+      <table>
+        <search>
+          <query>`lastfm_earliest` |search earliestyear=$year$ | stats count sparkline(count,30d) as listenspattern  by artist | where count &gt; 10</query>
+          <earliest>0</earliest>
+          <latest></latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">100</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="percentagesRow">false</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+  </row>
+</form>

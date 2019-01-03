@@ -1,0 +1,18 @@
+<panel>
+  <title>Artists I've Seen in Concert more than once</title>
+  <table>
+    <search>
+      <query>| inputlookup concerthistoryparse.csv | fillnull value="XXX" headliner opener1 opener2 opener3 band4 band5 band6 band7|  eval artist=headliner.",".opener1.",".opener2.",".opener3.",".band4.",".band5.",".band6.",".band7 | makemv artist delim=","| mvexpand  artist | where artist!="XXX" | stats count by artist | where count&gt;1 | sort -count</query>
+      <earliest>-1y@y</earliest>
+      <latest>@y</latest>
+      <sampleRatio>1</sampleRatio>
+    </search>
+    <option name="count">100</option>
+    <option name="dataOverlayMode">none</option>
+    <option name="drilldown">cell</option>
+    <option name="percentagesRow">false</option>
+    <option name="rowNumbers">false</option>
+    <option name="totalsRow">false</option>
+    <option name="wrap">true</option>
+  </table>
+</panel>

@@ -1,0 +1,19 @@
+<panel>
+  <title>Artists to See Live</title>
+  <table>
+    <search>
+      <query>`lastfm` |search NOT [|inputlookup concerts.csv | makemv artist delim="," | mvexpand artist | table artist] |eval threshold=[|inputlookup artistthreshold.csv | table threshold | return $threshold] | stats values(threshold) as threshold, count by artist | where count &gt; threshold |table artist,count | sort -count</query>
+      <earliest>0</earliest>
+      <latest></latest>
+      <sampleRatio>1</sampleRatio>
+    </search>
+    <option name="count">100</option>
+    <option name="dataOverlayMode">none</option>
+    <option name="drilldown">none</option>
+    <option name="percentagesRow">false</option>
+    <option name="refresh.display">progressbar</option>
+    <option name="rowNumbers">false</option>
+    <option name="totalsRow">false</option>
+    <option name="wrap">true</option>
+  </table>
+</panel>

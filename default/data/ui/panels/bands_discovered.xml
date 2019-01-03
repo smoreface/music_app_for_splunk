@@ -1,0 +1,17 @@
+<panel>
+  <title>Bands discovered in 2017</title>
+  <table>
+    <search>
+      <query>`lastfm` | stats values(artist) earliest(_time) as earliestlisten count(artist) as artistcount values(track_name) by artist | fieldformat earliestlisten = strftime(earliestlisten, "%Y") | where artistcount &gt; 10 | where earliestlisten&gt;1483228800 | sort -artistcount</query>
+      <earliest>0</earliest>
+      <sampleRatio>1</sampleRatio>
+    </search>
+    <option name="count">100</option>
+    <option name="dataOverlayMode">none</option>
+    <option name="drilldown">none</option>
+    <option name="percentagesRow">false</option>
+    <option name="rowNumbers">false</option>
+    <option name="totalsRow">false</option>
+    <option name="wrap">true</option>
+  </table>
+</panel>
