@@ -1,6 +1,9 @@
 # Music App for Splunk
 The Music App for Splunk was written for a single instance Splunk deployment for personal use. It has not been tested on distributed instances.
 
+## Download the Music App for Splunk
+Get the app from Splunkbase here: https://splunkbase.splunk.com/app/4344/ 
+
 ## About the Music App for Splunk
 I created this app for my own personal purposes, and am open sourcing it and sharing it on Splunkbase in the hope that others might also use Splunk to analyze their music data and share their dashboards, views, and add-ons with the community. 
 
