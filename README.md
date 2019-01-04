@@ -14,18 +14,24 @@ This app includes:
 * Saved searches
 * Lookups
 
+## Prerequisites
+* Have a single-instance Splunk deployment. For details about how to install Splunk on your instance, see the Installation Manual. At the time of the writing, see [Install on Mac](https://docs.splunk.com/Documentation/Splunk/latest/Installation/InstallonMacOS) for the latest instructions to install on a Mac.
+* Determine whether you will have a license for the Splunk instance. This app expects very low data ingest, so "Splunk Free" should be sufficient. See [About Splunk Free](https://docs.splunk.com/Documentation/Splunk/latest/Admin/MoreaboutSplunkFree) for more details.
+
 ## Install and configure the app
-Install the app using the in-product app browser. 
+After you have a single-instance deployment of Splunk running, install the app using the in-product app browser. 
 1. From Splunk Web, click the gear icon next to Apps.
 2. Click **Install app from file**.
 3. Locate the downloaded file and click Upload.
 
-### App recommendations
-The Music App for Splunk has no app dependencies, but several app recommendations. 
+### Install recommended apps
+The Music App for Splunk has no required app dependencies, but several recommended apps that will improve the app experience. 
 
 * [Lookup File Editor](https://splunkbase.splunk.com/app/1724/) app, to easily maintain updates to concert and ticket purchase lookups. I would not use the Music App for Splunk unless you have this app installed. 
 * [Splunk Common Information Model](https://splunkbase.splunk.com/app/1621/), to take advantage of future add-ons that contain a Songkick alert action, or modular inputs for music-relevant data sources like Last.fm or Spotify.
 * [Splunk Dashboard Examples](https://splunkbase.splunk.com/app/1603/), to use the information and lookups included to enrich your visualizations. 
+
+The app will still function without these apps installed.
 
 ## Add data to the Music App for Splunk
 You can add data that will populate dashboards and views by updating the lookups (see next section) and/or uploading iTunes music library XML files to Splunk. No views will display data until you add and configure data.
