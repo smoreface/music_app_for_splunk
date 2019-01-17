@@ -12,7 +12,7 @@
       <title>Top 10 Artists of 2018</title>
       <chart>
         <search base="baseSearch">
-          <query>timechart count(artist) by artist useother=f usenull=f span=1mon | sort -count(artist) limit=10</query>
+          <query>timechart count(artist) by artist useother=f usenull=f span=1mon | sort -count(artist)</query>
         </search>
         <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
         <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
