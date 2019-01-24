@@ -159,7 +159,7 @@ Used to provide a multi-value artist field to searches.
 | artist | Comma-separated list of artists at the concert. Multi-value field. No spaces. Use a trailing comma.                     | Fleece,Tokyo Police Club, |
 | venue  | Name of the venue that the concert was at. For festivals, can also be a park name.                                      | Bottom of the Hill        |
 | city   | City where the venue is located.                                                                                        | San Francisco             |
-| state  | Full name of the state, not the abbreviation. If you do use the abbreviation, modify the searches that use this lookup. | California.               |
+| state  | Full name of the state, not the abbreviation. If you do use the abbreviation, modify the searches that use this lookup. | California               |
 
 
 ### ticketpurchase.csv
