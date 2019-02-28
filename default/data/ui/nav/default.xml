@@ -22,6 +22,7 @@
   <collection label="Concerts">
     <view name="concert_statistics"/>
     <view name="more_concert_statistics"/>
+    <view name="who_should_i_see"/>
     <view name="songkick_concerts"/>
   </collection>
   <collection label="Splunk Default Views">

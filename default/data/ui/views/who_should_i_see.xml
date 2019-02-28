@@ -1,0 +1,218 @@
+<form>
+  <label>Who Should I See?</label>
+  <description>Compare up to three artists to see who I should see live.</description>
+  <fieldset submitButton="false">
+    <input type="text" token="Artist1">
+      <label>First Artist</label>
+      <prefix>"</prefix>
+      <suffix>"</suffix>
+    </input>
+    <input type="text" token="Artist2">
+      <label>Second Artist</label>
+      <prefix>"</prefix>
+      <suffix>"</suffix>
+    </input>
+    <input type="text" token="Artist3">
+      <label>Third Artist</label>
+      <prefix>"</prefix>
+      <suffix>"</suffix>
+      <default>none</default>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <title>Count of Listens - $Artist1$</title>
+      <single>
+        <search>
+          <query>`lastfm` | search artist=$Artist1$ | stats count</query>
+          <earliest>0</earliest>
+          <latest></latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="colorBy">value</option>
+        <option name="colorMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="numberPrecision">0</option>
+        <option name="rangeColors">["0x53a051","0x0877a6","0xf8be34","0xf1813f","0xdc4e41"]</option>
+        <option name="rangeValues">[0,30,70,100]</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="showSparkline">1</option>
+        <option name="showTrendIndicator">1</option>
+        <option name="trellis.enabled">0</option>
+        <option name="trellis.scales.shared">1</option>
+        <option name="trellis.size">medium</option>
+        <option name="trendColorInterpretation">standard</option>
+        <option name="trendDisplayMode">absolute</option>
+        <option name="unitPosition">after</option>
+        <option name="useColors">0</option>
+        <option name="useThousandSeparators">1</option>
+      </single>
+    </panel>
+    <panel>
+      <title>Count of Listens - $Artist2$</title>
+      <single>
+        <search>
+          <query>`lastfm` | search artist=$Artist2$ | stats count</query>
+          <earliest>0</earliest>
+          <latest></latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="colorBy">value</option>
+        <option name="colorMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="numberPrecision">0</option>
+        <option name="rangeColors">["0x53a051", "0x0877a6", "0xf8be34", "0xf1813f", "0xdc4e41"]</option>
+        <option name="rangeValues">[0,30,70,100]</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="showSparkline">1</option>
+        <option name="showTrendIndicator">1</option>
+        <option name="trellis.enabled">0</option>
+        <option name="trellis.scales.shared">1</option>
+        <option name="trellis.size">medium</option>
+        <option name="trendColorInterpretation">standard</option>
+        <option name="trendDisplayMode">absolute</option>
+        <option name="unitPosition">after</option>
+        <option name="useColors">0</option>
+        <option name="useThousandSeparators">1</option>
+      </single>
+    </panel>
+    <panel>
+      <title>Count of Listens - $Artist3$</title>
+      <single>
+        <search>
+          <query>`lastfm` | search artist=$Artist3$ | stats count</query>
+          <earliest>0</earliest>
+          <latest></latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="colorBy">value</option>
+        <option name="colorMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="numberPrecision">0</option>
+        <option name="rangeColors">["0x53a051", "0x0877a6", "0xf8be34", "0xf1813f", "0xdc4e41"]</option>
+        <option name="rangeValues">[0,30,70,100]</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="showSparkline">1</option>
+        <option name="showTrendIndicator">1</option>
+        <option name="trellis.enabled">0</option>
+        <option name="trellis.scales.shared">1</option>
+        <option name="trellis.size">medium</option>
+        <option name="trendColorInterpretation">standard</option>
+        <option name="trendDisplayMode">absolute</option>
+        <option name="unitPosition">after</option>
+        <option name="useColors">0</option>
+        <option name="useThousandSeparators">1</option>
+      </single>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Listens Over Time - $Artist1$</title>
+      <chart>
+        <search>
+          <query>`lastfm` |search artist=$Artist1$ | timechart span=3mon count</query>
+          <earliest>0</earliest>
+          <latest></latest>
+        </search>
+        <option name="charting.chart">line</option>
+        <option name="charting.drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+    <panel>
+      <title>Listens Over Time - $Artist2$</title>
+      <chart>
+        <search>
+          <query>`lastfm` | search artist=$Artist2$ | timechart span=3mon count</query>
+          <earliest>0</earliest>
+          <latest></latest>
+        </search>
+        <option name="charting.chart">line</option>
+        <option name="charting.drilldown">none</option>
+      </chart>
+    </panel>
+    <panel>
+      <title>Listens Over Time - $Artist3$</title>
+      <chart>
+        <search>
+          <query>`lastfm` | search artist=$Artist3$ | timechart span=3mon count</query>
+          <earliest>0</earliest>
+          <latest></latest>
+        </search>
+        <option name="charting.chart">line</option>
+        <option name="charting.drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Listens Over Time - All Artists Stacked</title>
+      <chart>
+        <search>
+          <query>`lastfm` | search (artist=$Artist1$ OR artist=$Artist2$ OR artist=$Artist3$) | timechart span=3mon count by artist</query>
+          <earliest>0</earliest>
+          <latest></latest>
+        </search>
+        <option name="charting.chart">line</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Should I go see $Artist1$ at all?</title>
+      <single>
+        <search>
+          <query>`lastfm` | search artist=$Artist1$ | stats count as mycount by artist
+| inputlookup append=t concert_threshold.csv
+| eventstats max(threshold) as threshold
+| search artist=*
+| eval verdict=if(mycount&gt;threshold, "Go to the concert!","Only go if it's cheap, yo.") 
+| fields verdict</query>
+          <earliest>0</earliest>
+          <latest></latest>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </single>
+    </panel>
+    <panel>
+      <title>Should I go see $Artist2$ at all?</title>
+      <single>
+        <search>
+          <query>`lastfm` | search artist=$Artist2$ 
+| stats count as mycount by artist
+| inputlookup append=t concert_threshold.csv
+| eventstats max(threshold) as threshold
+| search artist=*
+| eval verdict=if(mycount&gt;threshold, "Go to the concert!","Only go if it's cheap, yo.") 
+| fields verdict</query>
+          <earliest>0</earliest>
+          <latest></latest>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </single>
+    </panel>
+    <panel>
+      <title>Should I go see $Artist3$ at all?</title>
+      <single>
+        <search>
+          <query>`lastfm` | search artist=$Artist3$ | stats count as mycount by artist
+| inputlookup append=t concert_threshold.csv
+| eventstats max(threshold) as threshold
+| search artist=*
+| eval verdict=if(mycount&gt;threshold, "Go to the concert!","Only go if it's cheap, yo.") 
+| fields verdict</query>
+          <earliest>0</earliest>
+          <latest></latest>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </single>
+    </panel>
+  </row>
+</form>
