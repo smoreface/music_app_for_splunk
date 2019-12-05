@@ -178,3 +178,14 @@ Used to keep track of various data relating to ticket purchases.
 | cost          | Total cost of the ticket(s) purchased. Units omitted.                                                                                    | 22.06           |
 | face_value    | Face value for the ticket(s) purchased. Units omitted.                                                                                   | 15              |
 | discovery     | How you discovered the concert, if you remember.                                                                                         | songkick        |
+
+### spotify*.csv
+
+Used by the 2018_music and 2019_music dashboards. Specific lookup file names in use are: spotify2018.csv and spotify2019.csv, respectively.
+
+These lookups are CSV representations of the artists and track names of the "top 100 songs" according to #spotifywrapped. You can use an online service to convert the playlist that Spotify gives you into a CSV representation and add it to Splunk using the Lookup Editor. 
+
+| header        | description                                                                                                                              | example         |
+|---------------|------------------------------------------------------------------------------------------------------------------------------------------|-----------------|
+| artist | Artist of the track | Tourist |
+| track_name | Song name of the track  | Elixir |
