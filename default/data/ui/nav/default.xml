@@ -11,6 +11,9 @@
    <collection label="Time Analysis">
     <view name="top_of_all_time"/>
     <view name="2017_music"/>
+    <view name="2018_music"/>
+    <view name="2019_music"/>
+    <view name="2010s_music"/>
   </collection>
   <collection label="WIP">
     <view name="music_wip"/>
