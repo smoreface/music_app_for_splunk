@@ -1,22 +1,44 @@
-<dashboard>
+<form>
   <label>Coronavirus Pandemic Listening Habits</label>
+  <fieldset submitButton="true">
+    <input type="multiselect" token="months" searchWhenChanged="false">
+      <label>months</label>
+      <choice value="1">january</choice>
+      <choice value="2">february</choice>
+      <choice value="3">march</choice>
+      <choice value="4">april</choice>
+      <choice value="5">may</choice>
+      <choice value="6">june</choice>
+      <choice value="7">july</choice>
+      <choice value="8">august</choice>
+      <choice value="9">september</choice>
+      <choice value="10">october</choice>
+      <choice value="11">november</choice>
+      <choice value="12">december</choice>
+      <initialValue>3,4,5,6,7,8,9</initialValue>
+      <valueSuffix>,</valueSuffix>
+    </input>
+  </fieldset>
+  <search id="baseSearch">
+    <query>`lastfm` | timechart count as listen span=1mon</query>
+          <earliest>-3y@y</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+  </search>
   <row>
     <panel>
-      <title>Amount of Time Spent Listening to Music in March - September by Type and Year</title>
+      <title>Amount of Time Spent Listening to Music by Type and Year for $months$</title>
       <chart>
-        <search>
-          <query>`lastfm` | timechart count as listen span=1mon | eval listen_length=(listen*240) 
+        <search base="baseSearch">
+          <query>| eval listen_length=(listen*240) 
 | inputlookup append=t livestreams.csv | convert dur2sec(length) as stream_length |convert timeformat="%B %d %Y" mktime(watch_date) AS _time 
 |inputlookup append=t concerthistoryparse.csv 
 | eval show_length=case(info == "festival", "28800", info == "dj set", "14400", info == "concert", "10800") | convert timeformat="%B %d %Y" mktime(date) AS _time 
 | eval length=round(coalesce(listen_length,stream_length,show_length)/60) 
 | eval type=case(isnotnull(stream_length), "livestream", isnotnull(listen_length), "track listen", isnotnull(show_length), "show")
 | eval month=strftime(_time, "%-m"), year=strftime(_time, "%Y")  
-| search month IN (3,4,5,6,7,8,9) | search year IN (2017,2018,2019,2020)
+| search month IN ($months$) | search year IN (2017,2018,2019,2020)
 | timechart span=1y sum(length) as total_minutes_listened by type</query>
-          <earliest>-3y@y</earliest>
-          <latest>now</latest>
-          <sampleRatio>1</sampleRatio>
         </search>
         <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
         <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
@@ -102,7 +124,7 @@
   </row>
   <row>
     <panel>
-      <title>Amount of Time Spent Listening by Day of Week From March - September</title>
+      <title>Amount of Time Spent Listening by Day of Week for $months$</title>
       <chart>
         <search>
           <query>`lastfm` | timechart span=1d count as listen | eval listen_length=(listen*240) 
@@ -111,7 +133,7 @@
 | eval show_length=case(info == "festival", "28800", info == "dj set", "14400", info == "concert", "10800") | convert timeformat="%B %d %Y" mktime(date) AS _time 
 | eval length=round(coalesce(listen_length,stream_length,show_length)/60) 
 | eval month=strftime(_time, "%-m"), year=strftime(_time, "%Y"), sort_field=strftime(_time, "%w")
-| search month IN (3,4,5,6,7,8,9) | search year IN (2017,2018,2019,2020)
+| search month IN ($months$) | search year IN (2017,2018,2019,2020)
 | chart sum(length) as total_minutes_listened by year,sort_field
 |  rename 0 AS sunday 1 AS monday, 2 AS tuesday, 3 AS wednesday, 4 AS thursday, 5 AS friday, 6 AS saturday</query>
           <earliest>-3y@y</earliest>
@@ -146,6 +168,7 @@
         <option name="charting.legend.mode">standard</option>
         <option name="charting.legend.placement">right</option>
         <option name="charting.lineWidth">2</option>
+        <option name="refresh.display">progressbar</option>
         <option name="trellis.enabled">0</option>
         <option name="trellis.scales.shared">1</option>
         <option name="trellis.size">medium</option>
@@ -163,7 +186,7 @@
 | eval show_length=case(info == "festival", "28800", info == "dj set", "14400", info == "concert", "10800") | convert timeformat="%B %d %Y" mktime(date) AS _time 
 | eval length=round(coalesce(listen_length,stream_length,show_length)/60) 
 | eval month=strftime(_time, "%-m"), year=strftime(_time, "%Y"), weekday=strftime(_time, "%w"), hour=strftime(_time, "%H")
-| search month IN (3,4,5,6,7,8,9) | search year IN (2017,2018,2019,2020)
+| search month IN ($months$) | search year IN (2017,2018,2019,2020)
 |  eval time_of_day=case(in(hour,"10","11","12","13","14","15","16","17"),"probsworkday", in(hour,"18","19","20","21","22"), "4", in(hour,"23","24","00"), "5", in(hour,"01","02","03","04","05","06","07"), "6", in(hour,"08","09"), "1")
 |  eval time_of_day=case((time_of_day=="probsworkday" AND in(weekday,"1","2","3","4","5")), "2", (time_of_day=="probsworkday" AND in(weekday,"0","6")), "3", time_of_day!="probsworkday", time_of_day)
 | chart sum(length) as total_minutes_listened by year,time_of_day
@@ -200,6 +223,7 @@
         <option name="charting.legend.mode">standard</option>
         <option name="charting.legend.placement">right</option>
         <option name="charting.lineWidth">2</option>
+        <option name="refresh.display">progressbar</option>
         <option name="trellis.enabled">0</option>
         <option name="trellis.scales.shared">1</option>
         <option name="trellis.size">medium</option>
@@ -209,14 +233,11 @@
   <row>
     <panel>
       <single>
-        <search>
-          <query>`lastfm` | timechart count as listen span=1mon | eval listen_length=(listen*240) | inputlookup append=t livestreams.csv | convert dur2sec(length) as stream_length |convert timeformat="%B %d %Y" mktime(watch_date) AS _time |inputlookup append=t concerthistoryparse.csv | eval show_length=case(info == "festival", "28800", info == "dj set", "14400", info == "concert", "10800") | convert timeformat="%B %d %Y" mktime(date) AS _time | eval length=round(coalesce(listen_length,stream_length,show_length)/60) | eval month=strftime(_time, "%-m"), year=strftime(_time, "%Y")  | search month IN (3,4,5,6,7,8,9) | search year IN (2018,2019,2020) | stats sum(length) as length by year | delta length as change | eval percentage_growth=round((change*100)/(length-change),2) 
+        <search base="baseSearch">
+          <query>| eval listen_length=(listen*240) | inputlookup append=t livestreams.csv | convert dur2sec(length) as stream_length |convert timeformat="%B %d %Y" mktime(watch_date) AS _time |inputlookup append=t concerthistoryparse.csv | eval show_length=case(info == "festival", "28800", info == "dj set", "14400", info == "concert", "10800") | convert timeformat="%B %d %Y" mktime(date) AS _time | eval length=round(coalesce(listen_length,stream_length,show_length)/60) | eval month=strftime(_time, "%-m"), year=strftime(_time, "%Y")  | search month IN ($months$) | search year IN (2018,2019,2020) | stats sum(length) as length by year | delta length as change | eval percentage_growth=round((change*100)/(length-change),2) 
 | eval hours=round(length/60) | fields year,length,percentage_growth ,change,hours
 |  sort -year
 | fields hours</query>
-          <earliest>-3y@y</earliest>
-          <latest>now</latest>
-          <sampleRatio>1</sampleRatio>
         </search>
         <option name="colorBy">value</option>
         <option name="colorMode">none</option>
@@ -241,15 +262,12 @@
     </panel>
     <panel>
       <single>
-        <search>
-          <query>`lastfm` | timechart count as listen span=1mon | eval listen_length=(listen*240) | inputlookup append=t livestreams.csv | convert dur2sec(length) as stream_length |convert timeformat="%B %d %Y" mktime(watch_date) AS _time |inputlookup append=t concerthistoryparse.csv | eval show_length=case(info == "festival", "28800", info == "dj set", "14400", info == "concert", "10800") | convert timeformat="%B %d %Y" mktime(date) AS _time | eval length=round(coalesce(listen_length,stream_length,show_length)/60) | eval month=strftime(_time, "%-m"), year=strftime(_time, "%Y")  | search month IN (3,4,5,6,7,8,9) | search year IN (2018,2019,2020) | stats sum(length) as length by year | delta length as change | eval percentage_growth=round((change*100)/(length-change),2) 
+        <search base="baseSearch">
+          <query>| eval listen_length=(listen*240) | inputlookup append=t livestreams.csv | convert dur2sec(length) as stream_length |convert timeformat="%B %d %Y" mktime(watch_date) AS _time |inputlookup append=t concerthistoryparse.csv | eval show_length=case(info == "festival", "28800", info == "dj set", "14400", info == "concert", "10800") | convert timeformat="%B %d %Y" mktime(date) AS _time | eval length=round(coalesce(listen_length,stream_length,show_length)/60) | eval month=strftime(_time, "%-m"), year=strftime(_time, "%Y")  | search month IN ($months$) | search year IN (2018,2019,2020) | stats sum(length) as length by year | delta length as change | eval percentage_growth=round((change*100)/(length-change),2) 
 | eval hours=round(length/60) 
 |  eval hours_diff=round(change/60) | fields year,length,percentage_growth ,change,hours,hours_diff
 |  sort -year
 | fields hours_diff</query>
-          <earliest>-3y@y</earliest>
-          <latest>now</latest>
-          <sampleRatio>1</sampleRatio>
         </search>
         <option name="colorBy">value</option>
         <option name="colorMode">none</option>
@@ -274,15 +292,12 @@
     </panel>
     <panel>
       <single>
-        <search>
-          <query>`lastfm` | timechart count as listen span=1mon | eval listen_length=(listen*240) | inputlookup append=t livestreams.csv | convert dur2sec(length) as stream_length |convert timeformat="%B %d %Y" mktime(watch_date) AS _time |inputlookup append=t concerthistoryparse.csv | eval show_length=case(info == "festival", "28800", info == "dj set", "14400", info == "concert", "10800") | convert timeformat="%B %d %Y" mktime(date) AS _time | eval length=round(coalesce(listen_length,stream_length,show_length)/60) | eval month=strftime(_time, "%-m"), year=strftime(_time, "%Y")  | search month IN (3,4,5,6,7,8,9) | search year IN (2018,2019,2020) | stats sum(length) as length by year | delta length as change | eval percentage_growth=round((change*100)/(length-change),2) 
+        <search base="baseSearch">
+          <query>| eval listen_length=(listen*240) | inputlookup append=t livestreams.csv | convert dur2sec(length) as stream_length |convert timeformat="%B %d %Y" mktime(watch_date) AS _time |inputlookup append=t concerthistoryparse.csv | eval show_length=case(info == "festival", "28800", info == "dj set", "14400", info == "concert", "10800") | convert timeformat="%B %d %Y" mktime(date) AS _time | eval length=round(coalesce(listen_length,stream_length,show_length)/60) | eval month=strftime(_time, "%-m"), year=strftime(_time, "%Y")  | search month IN ($months$) | search year IN (2018,2019,2020) | stats sum(length) as length by year | delta length as change | eval percentage_growth=round((change*100)/(length-change),2) 
 | eval hours=round(length/60) 
 |  eval hours_diff=round(change/60) | fields year,length,percentage_growth ,change,hours,hours_diff
 |  sort -year
 | fields percentage_growth</query>
-          <earliest>-3y@y</earliest>
-          <latest>now</latest>
-          <sampleRatio>1</sampleRatio>
         </search>
         <option name="colorBy">value</option>
         <option name="colorMode">none</option>
@@ -310,7 +325,7 @@
     <panel>
       <single>
         <search>
-          <query>`lastfm_earliest` |search earliestyear IN (2020,2019,2018) | eval month=strftime(_time, "%-m") | stats count by artist,month,earliestyear | stats min(month) as earliest_month by artist,earliestyear | search earliest_month IN (3,4,5,6,7,8,9) | eval when=earliest_month." ".earliestyear | stats count by earliestyear | delta count as discovery | eval percentage_growth=round((discovery*100)/(count-discovery),2) | fields earliestyear,discovery,percentage_growth,count
+          <query>`lastfm_earliest` |search earliestyear IN (2020,2019,2018) | eval month=strftime(_time, "%-m") | stats count by artist,month,earliestyear | stats min(month) as earliest_month by artist,earliestyear | search earliest_month IN ($months$) | eval when=earliest_month." ".earliestyear | stats count by earliestyear | delta count as discovery | eval percentage_growth=round((discovery*100)/(count-discovery),2) | fields earliestyear,discovery,percentage_growth,count
 | sort -earliestyear 
 |  fields count</query>
           <earliest>0</earliest>
@@ -340,7 +355,7 @@
     <panel>
       <single>
         <search>
-          <query>`lastfm_earliest` |search earliestyear IN (2020,2019,2018) | eval month=strftime(_time, "%-m") | stats count by artist,month,earliestyear | stats min(month) as earliest_month by artist,earliestyear | search earliest_month IN (3,4,5,6,7,8,9) | eval when=earliest_month." ".earliestyear | stats count by earliestyear | delta count as discovery | eval percentage_growth=round((discovery*100)/(count-discovery),2) | fields earliestyear,discovery,percentage_growth,count
+          <query>`lastfm_earliest` |search earliestyear IN (2020,2019,2018) | eval month=strftime(_time, "%-m") | stats count by artist,month,earliestyear | stats min(month) as earliest_month by artist,earliestyear | search earliest_month IN ($months$) | eval when=earliest_month." ".earliestyear | stats count by earliestyear | delta count as discovery | eval percentage_growth=round((discovery*100)/(count-discovery),2) | fields earliestyear,discovery,percentage_growth,count
 | sort -earliestyear 
 |  fields discovery</query>
           <earliest>0</earliest>
@@ -370,7 +385,7 @@
     <panel>
       <single>
         <search>
-          <query>`lastfm_earliest` |search earliestyear IN (2020,2019,2018) | eval month=strftime(_time, "%-m") | stats count by artist,month,earliestyear | stats min(month) as earliest_month by artist,earliestyear | search earliest_month IN (3,4,5,6,7,8,9) | eval when=earliest_month." ".earliestyear | stats count by earliestyear | delta count as discovery | eval percentage_growth=round((discovery*100)/(count-discovery),2) | fields earliestyear,discovery,percentage_growth,count
+          <query>`lastfm_earliest` |search earliestyear IN (2020,2019,2018) | eval month=strftime(_time, "%-m") | stats count by artist,month,earliestyear | stats min(month) as earliest_month by artist,earliestyear | search earliest_month IN ($months$) | eval when=earliest_month." ".earliestyear | stats count by earliestyear | delta count as discovery | eval percentage_growth=round((discovery*100)/(count-discovery),2) | fields earliestyear,discovery,percentage_growth,count
 | sort -earliestyear 
 |  fields percentage_growth</query>
           <earliest>0</earliest>
@@ -564,13 +579,10 @@
   </row>
   <row>
     <panel>
-      <title>Amount of Time Spent Listening to Music in March - September by Year</title>
+      <title>Amount of Time Spent Listening to Music by Year in $months$</title>
       <chart>
-        <search>
-          <query>`lastfm` | timechart count as listen span=1mon | eval listen_length=(listen*240) | inputlookup append=t livestreams.csv | convert dur2sec(length) as stream_length |convert timeformat="%B %d %Y" mktime(watch_date) AS _time |inputlookup append=t concerthistoryparse.csv | eval show_length=case(info == "festival", "28800", info == "dj set", "14400", info == "concert", "10800") | convert timeformat="%B %d %Y" mktime(date) AS _time | eval length=round(coalesce(listen_length,stream_length,show_length)/60) | eval month=strftime(_time, "%-m"), year=strftime(_time, "%Y")  | search month IN (3,4,5,6,7,8,9) | search year IN (2017,2018,2019,2020) | stats sum(length) as minutes by year</query>
-          <earliest>1483257600</earliest>
-          <latest>now</latest>
-          <sampleRatio>1</sampleRatio>
+        <search base="baseSearch">
+          <query>| eval listen_length=(listen*240) | inputlookup append=t livestreams.csv | convert dur2sec(length) as stream_length |convert timeformat="%B %d %Y" mktime(watch_date) AS _time |inputlookup append=t concerthistoryparse.csv | eval show_length=case(info == "festival", "28800", info == "dj set", "14400", info == "concert", "10800") | convert timeformat="%B %d %Y" mktime(date) AS _time | eval length=round(coalesce(listen_length,stream_length,show_length)/60) | eval month=strftime(_time, "%-m"), year=strftime(_time, "%Y")  | search month IN ($months$) | search year IN (2017,2018,2019,2020) | stats sum(length) as minutes by year</query>
         </search>
         <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
         <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
@@ -609,10 +621,10 @@
   </row>
   <row>
     <panel>
-      <title>Total Listens in March - September by Year</title>
+      <title>Total Listens by Year in $months$</title>
       <chart>
         <search>
-          <query>`lastfm` | eval month=strftime(_time, "%-m"), year=strftime(_time, "%Y") | stats count by month,year | search month IN (3,4,5,6,7,8,9) | stats sum(count) as listens by year | search year IN (2017,2018,2019,2020)</query>
+          <query>`lastfm` | eval month=strftime(_time, "%-m"), year=strftime(_time, "%Y") | stats count by month,year | search month IN ($months$) | stats sum(count) as listens by year | search year IN (2017,2018,2019,2020)</query>
           <earliest>1483257600</earliest>
           <latest>now</latest>
           <sampleRatio>1</sampleRatio>
@@ -757,4 +769,4 @@
       </table>
     </panel>
   </row>
-</dashboard>
+</form>
