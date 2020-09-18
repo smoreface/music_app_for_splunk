@@ -40,11 +40,13 @@ You can add data that will populate dashboards and views by updating the lookups
 The app assumes an index called music. If you do not create that index, modify the `lastfm`, `lastfmearliest` and `itunes` macros to reflect the index you will use instead. Review those macros to see the sourcetypes that the macros contain and expect your data to conform to. If you use alternate sourcetypes, update the macros.
 
 ### Formatting the iTunes library XML
+You must have iTunes and not Apple Music installed on your computer to access the Library.xml file. If you have already upgraded to Apple Music, you cannot use this configuration. 
+
 The XML expected by the itunes_xml sourcetype included with the app must start with the <key></key> element.
 
 Use the data contained in the Library.xml file in the iTunes directory of your computer.
 The Library.xml file has two distinct sections: the tracks and the playlists. 
-I have not tested if you can upload the entire Library.xml file to Splunk and index it that way. I don't think the playlists would be indexed properly, and the data might not be supported in that format. Do that at your own risk! 
+I have not tested if you can upload the entire Library.xml file to Splunk and index it that way. I don't think the playlist data would be extracted properly, and the data might not be supported in that format. Do that at your own risk! 
 ```xml
 <key>166794</key>
 		<dict>
@@ -142,7 +144,7 @@ Used to provide more semantic data than the other concert lookup. You are welcom
 | venue         | Name of the venue that the concert was at. For festivals, can also be a park name.                                                                                           | The Indepdendent               |
 | city          | City where the venue is located.                                                                                                                                             | San Francisco                  |
 | state         | Full name of the state, not the abbreviation. If you do use the abbreviation, modify the searches that use this lookup.                                                      | California                     |
-| info          | Used to indicate additional detail about the concert. Currently used to specify “dj set” or “festival"                                                                       | dj set                         |
+| info          | Used to indicate additional detail about the concert. Currently used to specify "dj set", "festival", or "concert"                                                                       | dj set                         |
 | festival_name | Name of the festival, if applicable.                                                                                                                                         | Treasure Island Music Festival |
 | band5         | Additional field for a band name, usually for festivals.                                                                                                                     | Petit Biscuit                  |
 | band6         | Additional field for a band name, usually for festivals.                                                                                                                     | Shallou                        |
@@ -160,6 +162,20 @@ Used to provide a multi-value artist field to searches.
 | venue  | Name of the venue that the concert was at. For festivals, can also be a park name.                                      | Bottom of the Hill        |
 | city   | City where the venue is located.                                                                                        | San Francisco             |
 | state  | Full name of the state, not the abbreviation. If you do use the abbreviation, modify the searches that use this lookup. | California               |
+
+### livestreams.csv
+
+Used to provide a list of livestreamed DJ or concert performances watched online. 
+
+| header | description                                                                                                             | example                   |
+|--------|-------------------------------------------------------------------------------------------------------------------------|---------------------------|
+| stream_date   | Date that the livestream first streamed online.      | September 18 2020          |
+| watch_date | Date that you watched the livestream.                    | September 18 2020 |
+| artist  | Artist name performing in the livestream. Does not support multiple artist names.                                     | Justin Jay        |
+| length   | Length of time of the livestream, or amount of time that you watched the livestream, in HH:MM:SS format.                                                                                      | 00:45:00             |
+| details  | Optional. Use for the title of the stream, livestream festival name, or whatever you choose. | Beatport ReConnect               |
+| where_watched  | Site where you watched the livestream. | Twitch             |
+| link  | Optional. Link to the archived version of the livestream. | https://www.youtube.com/watch?v=RvRhUHTV_8k             |
 
 
 ### ticketpurchase.csv
