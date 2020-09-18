@@ -1,0 +1,772 @@
+<form>
+  <label>Coronavirus Pandemic Listening Habits</label>
+  <fieldset submitButton="true">
+    <input type="multiselect" token="months" searchWhenChanged="false">
+      <label>months</label>
+      <choice value="1">january</choice>
+      <choice value="2">february</choice>
+      <choice value="3">march</choice>
+      <choice value="4">april</choice>
+      <choice value="5">may</choice>
+      <choice value="6">june</choice>
+      <choice value="7">july</choice>
+      <choice value="8">august</choice>
+      <choice value="9">september</choice>
+      <choice value="10">october</choice>
+      <choice value="11">november</choice>
+      <choice value="12">december</choice>
+      <initialValue>3,4,5,6,7,8,9</initialValue>
+      <valueSuffix>,</valueSuffix>
+    </input>
+  </fieldset>
+  <search id="baseSearch">
+    <query>`lastfm` | timechart count as listen span=1mon</query>
+          <earliest>-3y@y</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+  </search>
+  <row>
+    <panel>
+      <title>Amount of Time Spent Listening to Music by Type and Year for $months$</title>
+      <chart>
+        <search base="baseSearch">
+          <query>| eval listen_length=(listen*240) 
+| inputlookup append=t livestreams.csv | convert dur2sec(length) as stream_length |convert timeformat="%B %d %Y" mktime(watch_date) AS _time 
+|inputlookup append=t concerthistoryparse.csv 
+| eval show_length=case(info == "festival", "28800", info == "dj set", "14400", info == "concert", "10800") | convert timeformat="%B %d %Y" mktime(date) AS _time 
+| eval length=round(coalesce(listen_length,stream_length,show_length)/60) 
+| eval type=case(isnotnull(stream_length), "livestream", isnotnull(listen_length), "track listen", isnotnull(show_length), "show")
+| eval month=strftime(_time, "%-m"), year=strftime(_time, "%Y")  
+| search month IN ($months$) | search year IN (2017,2018,2019,2020)
+| timechart span=1y sum(length) as total_minutes_listened by type</query>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.text">minutes</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.abbreviation">none</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.abbreviation">none</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.abbreviation">none</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">column</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">stacked</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.mode">standard</option>
+        <option name="charting.legend.placement">right</option>
+        <option name="charting.lineWidth">2</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="trellis.enabled">0</option>
+        <option name="trellis.scales.shared">1</option>
+        <option name="trellis.size">medium</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>LastFM Listening Habits by Day of Week From March - September</title>
+      <chart>
+        <search>
+          <query>`lastfm` | eval sort_field=case(date_wday=="monday", 1, date_wday=="tuesday", 2, date_wday=="wednesday", 3, date_wday=="thursday", 4, date_wday=="friday", 5, date_wday=="saturday", 6, date_wday=="sunday", 7)  |timechart span=1mon count by sort_field 
+|  rename 1 AS monday, 2 AS tuesday, 3 AS wednesday, 4 AS thursday, 5 AS friday, 6 AS saturday, 7 AS sunday | where (strftime(_time, "%m")=="03" OR strftime(_time, "%m")=="04" OR strftime(_time, "%m")=="05" OR strftime(_time, "%m")=="06" OR strftime(_time, "%m")=="07" OR strftime(_time, "%m")=="08" OR strftime(_time, "%m")=="09")</query>
+          <earliest>1519891200</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.abbreviation">none</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.abbreviation">none</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.abbreviation">none</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">bar</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.layout.splitSeries">1</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.mode">standard</option>
+        <option name="charting.legend.placement">right</option>
+        <option name="charting.lineWidth">2</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="trellis.enabled">0</option>
+        <option name="trellis.scales.shared">1</option>
+        <option name="trellis.size">medium</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Amount of Time Spent Listening by Day of Week for $months$</title>
+      <chart>
+        <search>
+          <query>`lastfm` | timechart span=1d count as listen | eval listen_length=(listen*240) 
+| inputlookup append=t livestreams.csv | convert dur2sec(length) as stream_length |convert timeformat="%B %d %Y" mktime(watch_date) AS _time 
+|inputlookup append=t concerthistoryparse.csv 
+| eval show_length=case(info == "festival", "28800", info == "dj set", "14400", info == "concert", "10800") | convert timeformat="%B %d %Y" mktime(date) AS _time 
+| eval length=round(coalesce(listen_length,stream_length,show_length)/60) 
+| eval month=strftime(_time, "%-m"), year=strftime(_time, "%Y"), sort_field=strftime(_time, "%w")
+| search month IN ($months$) | search year IN (2017,2018,2019,2020)
+| chart sum(length) as total_minutes_listened by year,sort_field
+|  rename 0 AS sunday 1 AS monday, 2 AS tuesday, 3 AS wednesday, 4 AS thursday, 5 AS friday, 6 AS saturday</query>
+          <earliest>-3y@y</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.abbreviation">none</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.abbreviation">none</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.abbreviation">none</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">bar</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.layout.splitSeries">1</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.mode">standard</option>
+        <option name="charting.legend.placement">right</option>
+        <option name="charting.lineWidth">2</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="trellis.enabled">0</option>
+        <option name="trellis.scales.shared">1</option>
+        <option name="trellis.size">medium</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>When Does My Listening Happen?</title>
+      <chart>
+        <search>
+          <query>`lastfm` | timechart span=1h count as listen | eval listen_length=(listen*240) 
+| inputlookup append=t livestreams.csv | convert dur2sec(length) as stream_length |convert timeformat="%B %d %Y" mktime(watch_date) AS _time 
+|inputlookup append=t concerthistoryparse.csv 
+| eval show_length=case(info == "festival", "28800", info == "dj set", "14400", info == "concert", "10800") | convert timeformat="%B %d %Y" mktime(date) AS _time 
+| eval length=round(coalesce(listen_length,stream_length,show_length)/60) 
+| eval month=strftime(_time, "%-m"), year=strftime(_time, "%Y"), weekday=strftime(_time, "%w"), hour=strftime(_time, "%H")
+| search month IN ($months$) | search year IN (2017,2018,2019,2020)
+|  eval time_of_day=case(in(hour,"10","11","12","13","14","15","16","17"),"probsworkday", in(hour,"18","19","20","21","22"), "4", in(hour,"23","24","00"), "5", in(hour,"01","02","03","04","05","06","07"), "6", in(hour,"08","09"), "1")
+|  eval time_of_day=case((time_of_day=="probsworkday" AND in(weekday,"1","2","3","4","5")), "2", (time_of_day=="probsworkday" AND in(weekday,"0","6")), "3", time_of_day!="probsworkday", time_of_day)
+| chart sum(length) as total_minutes_listened by year,time_of_day
+|  rename 1 as "wish_I_was_asleep", 2 as "workday", 3 as "weekend_chillin", 4 as "evening", 5 as "night_owl", 6 as "better_be_asleep"</query>
+          <earliest>-3y@y</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.abbreviation">none</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.abbreviation">none</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.abbreviation">none</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">bar</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.layout.splitSeries">1</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.mode">standard</option>
+        <option name="charting.legend.placement">right</option>
+        <option name="charting.lineWidth">2</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="trellis.enabled">0</option>
+        <option name="trellis.scales.shared">1</option>
+        <option name="trellis.size">medium</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <single>
+        <search base="baseSearch">
+          <query>| eval listen_length=(listen*240) | inputlookup append=t livestreams.csv | convert dur2sec(length) as stream_length |convert timeformat="%B %d %Y" mktime(watch_date) AS _time |inputlookup append=t concerthistoryparse.csv | eval show_length=case(info == "festival", "28800", info == "dj set", "14400", info == "concert", "10800") | convert timeformat="%B %d %Y" mktime(date) AS _time | eval length=round(coalesce(listen_length,stream_length,show_length)/60) | eval month=strftime(_time, "%-m"), year=strftime(_time, "%Y")  | search month IN ($months$) | search year IN (2018,2019,2020) | stats sum(length) as length by year | delta length as change | eval percentage_growth=round((change*100)/(length-change),2) 
+| eval hours=round(length/60) | fields year,length,percentage_growth ,change,hours
+|  sort -year
+| fields hours</query>
+        </search>
+        <option name="colorBy">value</option>
+        <option name="colorMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="numberPrecision">0</option>
+        <option name="rangeColors">["0x53a051","0x0877a6","0xf8be34","0xf1813f","0xdc4e41"]</option>
+        <option name="rangeValues">[0,30,70,100]</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="showSparkline">1</option>
+        <option name="showTrendIndicator">1</option>
+        <option name="trellis.enabled">0</option>
+        <option name="trellis.scales.shared">1</option>
+        <option name="trellis.size">medium</option>
+        <option name="trendColorInterpretation">standard</option>
+        <option name="trendDisplayMode">absolute</option>
+        <option name="underLabel">spent listening to music during this period</option>
+        <option name="unit">hours</option>
+        <option name="unitPosition">after</option>
+        <option name="useColors">0</option>
+        <option name="useThousandSeparators">1</option>
+      </single>
+    </panel>
+    <panel>
+      <single>
+        <search base="baseSearch">
+          <query>| eval listen_length=(listen*240) | inputlookup append=t livestreams.csv | convert dur2sec(length) as stream_length |convert timeformat="%B %d %Y" mktime(watch_date) AS _time |inputlookup append=t concerthistoryparse.csv | eval show_length=case(info == "festival", "28800", info == "dj set", "14400", info == "concert", "10800") | convert timeformat="%B %d %Y" mktime(date) AS _time | eval length=round(coalesce(listen_length,stream_length,show_length)/60) | eval month=strftime(_time, "%-m"), year=strftime(_time, "%Y")  | search month IN ($months$) | search year IN (2018,2019,2020) | stats sum(length) as length by year | delta length as change | eval percentage_growth=round((change*100)/(length-change),2) 
+| eval hours=round(length/60) 
+|  eval hours_diff=round(change/60) | fields year,length,percentage_growth ,change,hours,hours_diff
+|  sort -year
+| fields hours_diff</query>
+        </search>
+        <option name="colorBy">value</option>
+        <option name="colorMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="numberPrecision">0</option>
+        <option name="rangeColors">["0x53a051","0x0877a6","0xf8be34","0xf1813f","0xdc4e41"]</option>
+        <option name="rangeValues">[0,30,70,100]</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="showSparkline">1</option>
+        <option name="showTrendIndicator">1</option>
+        <option name="trellis.enabled">0</option>
+        <option name="trellis.scales.shared">1</option>
+        <option name="trellis.size">medium</option>
+        <option name="trendColorInterpretation">standard</option>
+        <option name="trendDisplayMode">absolute</option>
+        <option name="underLabel">more than this time period last year spent listening to music</option>
+        <option name="unit">hours</option>
+        <option name="unitPosition">after</option>
+        <option name="useColors">0</option>
+        <option name="useThousandSeparators">1</option>
+      </single>
+    </panel>
+    <panel>
+      <single>
+        <search base="baseSearch">
+          <query>| eval listen_length=(listen*240) | inputlookup append=t livestreams.csv | convert dur2sec(length) as stream_length |convert timeformat="%B %d %Y" mktime(watch_date) AS _time |inputlookup append=t concerthistoryparse.csv | eval show_length=case(info == "festival", "28800", info == "dj set", "14400", info == "concert", "10800") | convert timeformat="%B %d %Y" mktime(date) AS _time | eval length=round(coalesce(listen_length,stream_length,show_length)/60) | eval month=strftime(_time, "%-m"), year=strftime(_time, "%Y")  | search month IN ($months$) | search year IN (2018,2019,2020) | stats sum(length) as length by year | delta length as change | eval percentage_growth=round((change*100)/(length-change),2) 
+| eval hours=round(length/60) 
+|  eval hours_diff=round(change/60) | fields year,length,percentage_growth ,change,hours,hours_diff
+|  sort -year
+| fields percentage_growth</query>
+        </search>
+        <option name="colorBy">value</option>
+        <option name="colorMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="numberPrecision">0</option>
+        <option name="rangeColors">["0x53a051","0x0877a6","0xf8be34","0xf1813f","0xdc4e41"]</option>
+        <option name="rangeValues">[0,30,70,100]</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="showSparkline">1</option>
+        <option name="showTrendIndicator">1</option>
+        <option name="trellis.enabled">0</option>
+        <option name="trellis.scales.shared">1</option>
+        <option name="trellis.size">medium</option>
+        <option name="trendColorInterpretation">standard</option>
+        <option name="trendDisplayMode">absolute</option>
+        <option name="underLabel">more time spent listening to music compared to this time period last year</option>
+        <option name="unit">%</option>
+        <option name="unitPosition">after</option>
+        <option name="useColors">0</option>
+        <option name="useThousandSeparators">1</option>
+      </single>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <single>
+        <search>
+          <query>`lastfm_earliest` |search earliestyear IN (2020,2019,2018) | eval month=strftime(_time, "%-m") | stats count by artist,month,earliestyear | stats min(month) as earliest_month by artist,earliestyear | search earliest_month IN ($months$) | eval when=earliest_month." ".earliestyear | stats count by earliestyear | delta count as discovery | eval percentage_growth=round((discovery*100)/(count-discovery),2) | fields earliestyear,discovery,percentage_growth,count
+| sort -earliestyear 
+|  fields count</query>
+          <earliest>0</earliest>
+          <latest></latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="colorBy">value</option>
+        <option name="colorMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="numberPrecision">0</option>
+        <option name="rangeColors">["0x53a051","0x0877a6","0xf8be34","0xf1813f","0xdc4e41"]</option>
+        <option name="rangeValues">[0,30,70,100]</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="showSparkline">1</option>
+        <option name="showTrendIndicator">1</option>
+        <option name="trellis.enabled">0</option>
+        <option name="trellis.scales.shared">1</option>
+        <option name="trellis.size">medium</option>
+        <option name="trendColorInterpretation">standard</option>
+        <option name="trendDisplayMode">absolute</option>
+        <option name="underLabel">total artists discovered during this time period this year</option>
+        <option name="unitPosition">after</option>
+        <option name="useColors">0</option>
+        <option name="useThousandSeparators">1</option>
+      </single>
+    </panel>
+    <panel>
+      <single>
+        <search>
+          <query>`lastfm_earliest` |search earliestyear IN (2020,2019,2018) | eval month=strftime(_time, "%-m") | stats count by artist,month,earliestyear | stats min(month) as earliest_month by artist,earliestyear | search earliest_month IN ($months$) | eval when=earliest_month." ".earliestyear | stats count by earliestyear | delta count as discovery | eval percentage_growth=round((discovery*100)/(count-discovery),2) | fields earliestyear,discovery,percentage_growth,count
+| sort -earliestyear 
+|  fields discovery</query>
+          <earliest>0</earliest>
+          <latest></latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="colorBy">value</option>
+        <option name="colorMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="numberPrecision">0</option>
+        <option name="rangeColors">["0x53a051","0x0877a6","0xf8be34","0xf1813f","0xdc4e41"]</option>
+        <option name="rangeValues">[0,30,70,100]</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="showSparkline">1</option>
+        <option name="showTrendIndicator">1</option>
+        <option name="trellis.enabled">0</option>
+        <option name="trellis.scales.shared">1</option>
+        <option name="trellis.size">medium</option>
+        <option name="trendColorInterpretation">standard</option>
+        <option name="trendDisplayMode">absolute</option>
+        <option name="underLabel">more artists discovered during this time period than last year</option>
+        <option name="unitPosition">after</option>
+        <option name="useColors">0</option>
+        <option name="useThousandSeparators">1</option>
+      </single>
+    </panel>
+    <panel>
+      <single>
+        <search>
+          <query>`lastfm_earliest` |search earliestyear IN (2020,2019,2018) | eval month=strftime(_time, "%-m") | stats count by artist,month,earliestyear | stats min(month) as earliest_month by artist,earliestyear | search earliest_month IN ($months$) | eval when=earliest_month." ".earliestyear | stats count by earliestyear | delta count as discovery | eval percentage_growth=round((discovery*100)/(count-discovery),2) | fields earliestyear,discovery,percentage_growth,count
+| sort -earliestyear 
+|  fields percentage_growth</query>
+          <earliest>0</earliest>
+          <latest></latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="colorBy">value</option>
+        <option name="colorMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="numberPrecision">0</option>
+        <option name="rangeColors">["0x53a051","0x0877a6","0xf8be34","0xf1813f","0xdc4e41"]</option>
+        <option name="rangeValues">[0,30,70,100]</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="showSparkline">1</option>
+        <option name="showTrendIndicator">1</option>
+        <option name="trellis.enabled">0</option>
+        <option name="trellis.scales.shared">1</option>
+        <option name="trellis.size">medium</option>
+        <option name="trendColorInterpretation">standard</option>
+        <option name="trendDisplayMode">absolute</option>
+        <option name="underLabel">percent increase compared with artist discovery during this period last year</option>
+        <option name="unit">%</option>
+        <option name="unitPosition">after</option>
+        <option name="useColors">0</option>
+        <option name="useThousandSeparators">1</option>
+      </single>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <single>
+        <search>
+          <query>| inputlookup livestreams.csv | stats dc(artist)</query>
+          <earliest>-15m</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="colorBy">value</option>
+        <option name="colorMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="numberPrecision">0</option>
+        <option name="rangeColors">["0x53a051","0x0877a6","0xf8be34","0xf1813f","0xdc4e41"]</option>
+        <option name="rangeValues">[0,30,70,100]</option>
+        <option name="showSparkline">1</option>
+        <option name="showTrendIndicator">1</option>
+        <option name="trellis.enabled">0</option>
+        <option name="trellis.scales.shared">1</option>
+        <option name="trellis.size">medium</option>
+        <option name="trendColorInterpretation">standard</option>
+        <option name="trendDisplayMode">absolute</option>
+        <option name="underLabel">total artists watched in livestreams</option>
+        <option name="unitPosition">after</option>
+        <option name="useColors">0</option>
+        <option name="useThousandSeparators">1</option>
+      </single>
+    </panel>
+    <panel>
+      <single>
+        <search>
+          <query>| inputlookup livestreams.csv | stats count</query>
+          <earliest>-15m</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="colorBy">value</option>
+        <option name="colorMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="numberPrecision">0</option>
+        <option name="rangeColors">["0x53a051","0x0877a6","0xf8be34","0xf1813f","0xdc4e41"]</option>
+        <option name="rangeValues">[0,30,70,100]</option>
+        <option name="showSparkline">1</option>
+        <option name="showTrendIndicator">1</option>
+        <option name="trellis.enabled">0</option>
+        <option name="trellis.scales.shared">1</option>
+        <option name="trellis.size">medium</option>
+        <option name="trendColorInterpretation">standard</option>
+        <option name="trendDisplayMode">absolute</option>
+        <option name="underLabel">total livestreams watched</option>
+        <option name="unitPosition">after</option>
+        <option name="useColors">0</option>
+        <option name="useThousandSeparators">1</option>
+      </single>
+    </panel>
+    <panel>
+      <single>
+        <search>
+          <query>| inputlookup livestreams.csv | convert dur2sec(length) as stream_length |convert timeformat="%B %d %Y" mktime(watch_date) AS _time | eval minutes=round(stream_length/60) | eval month=strftime(_time, "%-m"), year=strftime(_time, "%Y")  | search month IN (3,4,5,6,7,8,9) | search year=2020 | stats sum(minutes) as total_mins_spent 
+|  eval num_concerts=round(total_mins_spent/180,2), hours=round(total_mins_spent/60)
+|  fields hours</query>
+          <earliest>-15m</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="colorBy">value</option>
+        <option name="colorMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="numberPrecision">0</option>
+        <option name="rangeColors">["0x53a051","0x0877a6","0xf8be34","0xf1813f","0xdc4e41"]</option>
+        <option name="rangeValues">[0,30,70,100]</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="showSparkline">1</option>
+        <option name="showTrendIndicator">1</option>
+        <option name="trellis.enabled">0</option>
+        <option name="trellis.scales.shared">1</option>
+        <option name="trellis.size">medium</option>
+        <option name="trendColorInterpretation">standard</option>
+        <option name="trendDisplayMode">absolute</option>
+        <option name="underLabel">spent watching livestreams during this period</option>
+        <option name="unit">hours</option>
+        <option name="unitPosition">after</option>
+        <option name="useColors">0</option>
+        <option name="useThousandSeparators">1</option>
+      </single>
+    </panel>
+    <panel>
+      <single>
+        <search>
+          <query>| inputlookup livestreams.csv | convert dur2sec(length) as stream_length |convert timeformat="%B %d %Y" mktime(watch_date) AS _time | eval minutes=round(stream_length/60) | eval month=strftime(_time, "%-m"), year=strftime(_time, "%Y")  | search month IN (3,4,5,6,7,8,9) | search year=2020 | stats sum(minutes) as total_mins_spent 
+|  eval num_concerts=round(total_mins_spent/180,2) 
+|  fields num_concerts</query>
+          <earliest>-15m</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="colorBy">value</option>
+        <option name="colorMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="numberPrecision">0</option>
+        <option name="rangeColors">["0x53a051","0x0877a6","0xf8be34","0xf1813f","0xdc4e41"]</option>
+        <option name="rangeValues">[0,30,70,100]</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="showSparkline">1</option>
+        <option name="showTrendIndicator">1</option>
+        <option name="trellis.enabled">0</option>
+        <option name="trellis.scales.shared">1</option>
+        <option name="trellis.size">medium</option>
+        <option name="trendColorInterpretation">standard</option>
+        <option name="trendDisplayMode">absolute</option>
+        <option name="underLabel">concerts worth of livestreams watched</option>
+        <option name="unitPosition">after</option>
+        <option name="useColors">0</option>
+        <option name="useThousandSeparators">1</option>
+      </single>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Shazams vs Number of Livestreams Watched</title>
+      <chart>
+        <search>
+          <query>sourcetype="shazam_json" category=MUSIC | timechart span=1d count as total_shazams | append [|inputlookup livestreams.csv | convert timeformat="%B %d %Y" mktime(watch_date) AS _time | timechart span=1d count as total_livestreams]</query>
+          <earliest>1577925602</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.abbreviation">none</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.abbreviation">none</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.abbreviation">none</option>
+        <option name="charting.axisY2.enabled">1</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">area</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.overlayFields">total_livestreams</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.mode">standard</option>
+        <option name="charting.legend.placement">right</option>
+        <option name="charting.lineWidth">2</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="trellis.enabled">0</option>
+        <option name="trellis.scales.shared">1</option>
+        <option name="trellis.size">medium</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Amount of Time Spent Listening to Music by Year in $months$</title>
+      <chart>
+        <search base="baseSearch">
+          <query>| eval listen_length=(listen*240) | inputlookup append=t livestreams.csv | convert dur2sec(length) as stream_length |convert timeformat="%B %d %Y" mktime(watch_date) AS _time |inputlookup append=t concerthistoryparse.csv | eval show_length=case(info == "festival", "28800", info == "dj set", "14400", info == "concert", "10800") | convert timeformat="%B %d %Y" mktime(date) AS _time | eval length=round(coalesce(listen_length,stream_length,show_length)/60) | eval month=strftime(_time, "%-m"), year=strftime(_time, "%Y")  | search month IN ($months$) | search year IN (2017,2018,2019,2020) | stats sum(length) as minutes by year</query>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.abbreviation">none</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.abbreviation">none</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.abbreviation">none</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">column</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.mode">standard</option>
+        <option name="charting.legend.placement">right</option>
+        <option name="charting.lineWidth">2</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="trellis.enabled">0</option>
+        <option name="trellis.scales.shared">1</option>
+        <option name="trellis.size">medium</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Total Listens by Year in $months$</title>
+      <chart>
+        <search>
+          <query>`lastfm` | eval month=strftime(_time, "%-m"), year=strftime(_time, "%Y") | stats count by month,year | search month IN ($months$) | stats sum(count) as listens by year | search year IN (2017,2018,2019,2020)</query>
+          <earliest>1483257600</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.abbreviation">none</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.abbreviation">none</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.abbreviation">none</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">column</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.mode">standard</option>
+        <option name="charting.legend.placement">right</option>
+        <option name="charting.lineWidth">2</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="trellis.enabled">0</option>
+        <option name="trellis.scales.shared">1</option>
+        <option name="trellis.size">medium</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Livestreams: Number of Streams Watched Per Day</title>
+      <chart>
+        <search>
+          <query>|inputlookup livestreams.csv | convert timeformat="%B %d %Y" mktime(watch_date) AS _time | timechart count span=1d</query>
+          <earliest>1583049600</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.abbreviation">none</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.abbreviation">none</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.abbreviation">none</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">column</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">stacked</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.mode">standard</option>
+        <option name="charting.legend.placement">none</option>
+        <option name="charting.lineWidth">2</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="trellis.enabled">0</option>
+        <option name="trellis.scales.shared">1</option>
+        <option name="trellis.size">medium</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Livestreams: Top 10 Artists by Number of Streams Watched</title>
+      <table>
+        <search>
+          <query>|inputlookup livestreams.csv | stats count as total_streams by artist | sort -total_streams limit=15</query>
+          <earliest>-3y</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">20</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="percentagesRow">false</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+    <panel>
+      <title>Top 15 Streamed Artists by Total Time Listened</title>
+      <table>
+        <search>
+          <query>|inputlookup livestreams.csv |fields length,artist | convert dur2sec(length) as stream_length | stats sum(stream_length) as time_streamed by artist | sort -time_streamed limit=15 |eval to_be_minutes=time_streamed%3600 , hours=floor(time_streamed/3600) | eval minutes=round(to_be_minutes/60) | eval total_time_listened=hours." hours, ".minutes." minutes" | fields artist total_time_listened</query>
+          <earliest>-4mon</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">20</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="percentagesRow">false</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Livestreams: Top 5 Locations To Watch Streams</title>
+      <table>
+        <search>
+          <query>|inputlookup livestreams.csv | stats count as total_streams by where_watched | sort -total_streams limit=5</query>
+          <earliest>0</earliest>
+          <latest></latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">20</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="percentagesRow">false</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+  </row>
+</form>
