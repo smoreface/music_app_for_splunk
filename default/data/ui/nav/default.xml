@@ -7,6 +7,7 @@
     <view name="itunes_stats"/>
     <view name="listen_habit_stats"/>
     <view name="dance_music_analysis"/>
+    <view name="coronavirus_pandemic_listening_habits"/>
   </collection>
    <collection label="Time Analysis">
     <view name="top_of_all_time"/>
