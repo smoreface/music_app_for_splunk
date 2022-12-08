@@ -1,0 +1,145 @@
+<form version="1.1">
+  <label>Artist Analysis</label>
+  <fieldset submitButton="false">
+    <input type="text" token="artist">
+      <label>Artist</label>
+      <default>Alkaline Trio</default>
+    </input>
+    <input type="time" token="field1">
+      <label></label>
+      <default>
+        <earliest>-24h@h</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <title>Total Listens for $artist$</title>
+      <single>
+        <search>
+          <query>`lastfm` | search artist="$artist$" | stats count</query>
+          <earliest>$field1.earliest$</earliest>
+          <latest>$field1.latest$</latest>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </single>
+    </panel>
+    <panel>
+      <title>Total Songs in Library for $artist$</title>
+      <single>
+        <search>
+          <query>`itunes` | search artist="$artist$" | stats count(track_name)</query>
+          <earliest>$field1.earliest$</earliest>
+          <latest>$field1.latest$</latest>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </single>
+    </panel>
+    <panel>
+      <title>Number of Times I've Seen $artist$ Live</title>
+      <single>
+        <search>
+          <query>|inputlookup concerts.csv | makemv artist delim="," | mvexpand artist | search artist="$artist$" | stats count</query>
+          <earliest>$field1.earliest$</earliest>
+          <latest>$field1.latest$</latest>
+        </search>
+        <option name="drilldown">none</option>
+      </single>
+    </panel>
+  </row>
+   <row>
+    <panel>
+      <title>Listens Over Time - Artists I've Seen Live</title>
+      <chart>
+        <search>
+          <query>`lastfm` | search artist="$artist$" | timechart count span=1w</query>
+          <earliest>0</earliest>
+          <latest></latest>
+        </search>
+        <search type="annotation">
+          <query>|inputlookup concerts.csv | makemv artist delim="," | mvexpand artist | search artist="$artist$" | eval _time=strptime(date, "%B %d %Y") | eval annotation_label="$artist$ at ".venue </query>
+          <earliest>0</earliest>
+          <latest></latest>
+        </search>
+        <option name="charting.chart">area</option>
+        <option name="charting.drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>First Discovery</title>
+      <single>
+        <search>
+          <query>`lastfm` | search artist="$artist$" |stats min(_time) AS earliestlisten | fieldformat earliestlisten = strftime(earliestlisten, " %m/%d/%Y %H:%M:%S") |sort earliestlisten limit=10</query>
+          <earliest>$field1.earliest$</earliest>
+          <latest>$field1.latest$</latest>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </single>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Top 15 songs for $artist$</title>
+      <table>
+        <search>
+          <query>`lastfm` | search artist="$artist$" | stats count as listens by track_name | sort -listens limit=15</query>
+          <earliest>$field1.earliest$</earliest>
+          <latest>$field1.latest$</latest>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </table>
+    </panel>
+    <panel>
+      <title>Top albums for $artist$</title>
+      <table>
+        <search>
+          <query>`lastfm` | search artist="$artist$" | stats count by album | sort -count</query>
+          <earliest>$field1.earliest$</earliest>
+          <latest>$field1.latest$</latest>
+        </search>
+        <option name="count">10</option>
+        <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Listens Over Time</title>
+      <chart>
+        <search>
+          <query>`lastfm` | search artist="$artist$" | timechart span=1mon count</query>
+          <earliest>$field1.earliest$</earliest>
+          <latest>$field1.latest$</latest>
+        </search>
+        <option name="charting.chart">area</option>
+        <option name="charting.drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Album Covers for $artist$</title>
+      <viz type="imageviewer-customviz.imageviewer">
+        <search>
+          <query>`lastfm` | search artist="$artist$" | stats values(album.image) as album_cover, count by album | search album_cover!="" | mvexpand album_cover | search album_cover="*300x300*" | dedup album | rename album_cover as imageurl  | strcat album " has " count " listen(s) " description | sort -count | table imageurl description</query>
+          <earliest>$field1.earliest$</earliest>
+          <latest>$field1.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="height">680</option>
+        <option name="refresh.display">progressbar</option>
+      </viz>
+    </panel>
+  </row>
+</form>

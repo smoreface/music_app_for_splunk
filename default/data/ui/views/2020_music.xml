@@ -1,18 +1,18 @@
 <dashboard version="1.1">
-  <label>2010s Music</label>
+  <label>2020 Music</label>
   <search id="baseSearch">
     <query>
-      `lastfm` | fields track_name,artist,album
+      `lastfm` | bin span=1mon _time | stats count by _time artist album track_name
     </query>
-    <earliest>1262304000</earliest>
-    <latest>1577865600</latest>
+    <earliest>1577836800</earliest>
+    <latest>1609459199</latest>
   </search>
   <row>
     <panel>
-      <title>Top 10 Artists of 2010s</title>
+      <title>Top 10 Artists of 2020</title>
       <chart>
-        <search base="baseSearch">
-          <query>timechart count(artist) by artist useother=f usenull=f span=1mon | sort -count(artist)</query>
+        <search>
+          <query>`lastfm`| timechart count as listens by artist useother=f usenull=f span=1mon | sort -listens</query>
         </search>
         <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
         <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
@@ -54,7 +54,7 @@
       <title>Top 10 Artists</title>
       <table>
         <search base="baseSearch">
-          <query>stats count(artist) as listens by artist | sort -listens limit=10</query>
+          <query>stats sum(count) as listens by artist | sort -listens limit=10</query>
         </search>
         <option name="count">100</option>
         <option name="dataOverlayMode">none</option>
@@ -70,7 +70,7 @@
       <title>Top 10 Songs</title>
       <table>
         <search base="baseSearch">
-          <query>stats count(track_name) as listens by track_name,artist | sort -listens limit=10</query>
+          <query>stats sum(count) as listens by track_name,artist | sort -listens limit=10</query>
         </search>
         <option name="count">100</option>
         <option name="dataOverlayMode">none</option>
@@ -90,7 +90,7 @@
       <title>Top 10 Albums</title>
       <table>
         <search base="baseSearch">
-          <query>stats count(album) as listens by album,artist | sort -listens limit=10</query>
+          <query>stats sum(count) as listens by album,artist | sort -listens limit=10</query>
         </search>
         <option name="count">10</option>
         <option name="drilldown">none</option>
@@ -100,10 +100,31 @@
   </row>
   <row>
     <panel>
+      <title>iTunes Metadata About Selection</title>
+      <table>
+        <search>
+          <query>`itunes` (artist="$artist$" OR track_name="$track_name$") | eval length=round('track_length'/1000), len=tostring(length, "duration") | rex field=len "00:(?&lt;l&gt;\d*:\d*)"| replace "00:" WITH "" IN l | rename l as track_length | table artist, track_name, album, genre,rating, release_date, date_added, Kind, track_length</query>
+          <earliest>0</earliest>
+          <latest></latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">100</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">cell</option>
+        <option name="percentagesRow">false</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
       <title>Total Listens</title>
       <single>
         <search base="baseSearch">
-          <query>stats count</query>
+          <query>stats sum(count) as count</query>
         </search>
         <option name="colorBy">value</option>
         <option name="colorMode">none</option>
@@ -128,7 +149,7 @@
       <title>Minutes Listened to iTunes Library Songs</title>
       <single>
         <search base="baseSearch">
-          <query>fields track_name | stats count by track_name | sort -count | lookup itunestracklength.csv track_name OUTPUT track_length | eventstats min(track_length) as length by track_name | table track_name,length,count | eval tracklistentime=(length*count) | stats sum(tracklistentime) as total_duration_ms | eval total_mins=round('total_duration_ms'/60000), yr_mins=round('total_mins'/525600, 5) | fields total_mins</query>
+          <query>stats sum(count) as count by track_name | sort -count | lookup itunestracklength.csv track_name OUTPUT track_length | eventstats min(track_length) as length by track_name | table track_name,length,count | eval tracklistentime=(length*count) | stats sum(tracklistentime) as total_duration_ms | eval total_mins=round('total_duration_ms'/60000), yr_mins=round('total_mins'/525600, 5) | fields total_mins</query>
         </search>
         <option name="colorBy">value</option>
         <option name="colorMode">none</option>
@@ -151,12 +172,12 @@
       </single>
     </panel>
     <panel>
-      <title>Songs Purchased in the 2010s</title>
+      <title>Songs Purchased from iTunes in 2020</title>
       <single>
         <search>
           <query>`itunes` Kind="Purchased *" | stats count</query>
-          <earliest>1262304000</earliest>
-          <latest>1546329600</latest>
+         <earliest>1577836800</earliest>
+    <latest>1609459199</latest>
           <sampleRatio>1</sampleRatio>
         </search>
         <option name="colorBy">value</option>
@@ -182,10 +203,10 @@
   </row>
   <row>
     <panel>
-      <title>Top 20 Artists Discovered in the 2010s</title>
+      <title>Top 20 Artists Discovered in 2020</title>
       <table>
         <search>
-          <query>`lastfm_earliest` | search earliestyear IN (2010,2011,2012,2013,2014,2015,2016,2017,2018,2019) | stats count sparkline(count,3mon) as listenspattern by artist | sort -count limit=20 | lookup earliestlistens.csv artist OUTPUTNEW earliestlisten as first_discovered | eval first_discovered=strftime(first_discovered, "%B %d, %Y %H:%M:%S")</query>
+          <query>`lastfm_earliest` | search earliestyear=2020 | stats count sparkline(count,30d) as listenspattern  by artist | sort -count limit=20 | lookup earliestlistens.csv artist OUTPUTNEW earliestlisten as first_discovered | eval first_discovered=strftime(first_discovered, "%B %d, %Y %H:%M:%S")</query>
           <earliest>0</earliest>
           <latest></latest>
           <sampleRatio>1</sampleRatio>
@@ -203,10 +224,31 @@
   </row>
   <row>
     <panel>
-      <title>Total Spent on Concerts Attended in the 2010s</title>
+      <title>Venues Visited for the First Time in 2020</title>
+      <table>
+        <search>
+          <query>| inputlookup concerts.csv | convert timeformat="%B %d %Y" mktime(date)  AS _time | eventstats count by venue,city,state  | search _time&gt;=1577836800 _time&lt;1609459199 | search count=1 | sort _time | table venue,city,state,date</query>
+          <earliest>-1y@y</earliest>
+          <latest>@y</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">20</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="percentagesRow">false</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Total Spent on Concerts Attended in 2020</title>
       <single>
         <search>
-          <query>|inputlookup ticketpurchase.csv | convert timeformat="%B %d %Y" mktime(concert_date)  AS _time | search _time&gt;=1262304000 _time&lt;1577865600| eval cost=coalesce(cost, face_value) | table artist,cost,face_value | search [|inputlookup concerts.csv | makemv artist delim="," | mvexpand artist| table artist] | stats sum(cost)</query>
+          <query>|inputlookup ticketpurchase.csv | convert timeformat="%B %d %Y" mktime(concert_date)  AS _time | search _time&gt;=1577836800 _time&lt;1609459199| eval cost=coalesce(cost, face_value) | table artist,cost,face_value | search [|inputlookup concerts.csv | makemv artist delim="," | mvexpand artist| table artist] | stats sum(cost)</query>
           <earliest>-24h@h</earliest>
           <latest>now</latest>
           <sampleRatio>1</sampleRatio>
@@ -232,10 +274,10 @@
       </single>
     </panel>
     <panel>
-      <title>Total Concerts in the 2010s</title>
+      <title>Total Concerts in 2020</title>
       <single>
         <search>
-          <query>|inputlookup concerts.csv | convert timeformat="%B %d %Y" mktime(date)  AS _time | search _time&gt;=1262304000 _time&lt;1577865600 | stats count</query>
+          <query>|inputlookup concerts.csv | convert timeformat="%B %d %Y" mktime(date)  AS _time | search _time&gt;=1577836800 _time&lt;1609459199 | stats count</query>
           <earliest>-24h@h</earliest>
           <latest>now</latest>
           <sampleRatio>1</sampleRatio>
@@ -261,10 +303,10 @@
       </single>
     </panel>
     <panel>
-      <title>Artists Seen in Concert in the 2010s</title>
+      <title>Artists Seen in Concert in 2020</title>
       <single>
         <search>
-          <query>|inputlookup concerts.csv | convert timeformat="%B %d %Y" mktime(date)  AS _time | search _time&gt;=1262304000 _time&lt;1577865600 |makemv artist delim="," | mvexpand artist | stats count</query>
+          <query>|inputlookup concerts.csv | convert timeformat="%B %d %Y" mktime(date)  AS _time | search _time&gt;=1577836800 _time&lt;1609459199 |makemv artist delim="," | mvexpand artist | stats count</query>
           <earliest>1514793600</earliest>
           <latest>1546329600</latest>
           <sampleRatio>1</sampleRatio>
@@ -290,10 +332,10 @@
       </single>
     </panel>
     <panel>
-      <title>Total Spent on Concert Tickets in the 2010s</title>
+      <title>Total Spent on Concert Tickets in 2020</title>
       <single>
         <search>
-          <query>|inputlookup ticketpurchase.csv | convert timeformat="%B %d %Y" mktime(purchase_date)  AS _time | search _time&gt;=1262304000 _time&lt;1577865600 | eval cost=coalesce(cost, face_value) | table artist,cost,face_value | stats sum(cost)</query>
+          <query>|inputlookup ticketpurchase.csv | convert timeformat="%B %d %Y" mktime(purchase_date)  AS _time | search _time&gt;=1577836800 _time&lt;1609459199 | eval cost=coalesce(cost, face_value) | fields artist,cost,face_value | stats sum(cost)</query>
           <earliest>-24h@h</earliest>
           <latest>now</latest>
           <sampleRatio>1</sampleRatio>
@@ -324,9 +366,9 @@
       <title>Number of concerts per month</title>
       <chart>
         <search>
-          <query>|inputlookup concerts.csv | convert timeformat="%B %d %Y" mktime(date)  AS _time | search _time&gt;=1262304000 _time&lt;1577865600 | timechart span=1mon count</query>
-          <earliest>1546329600</earliest>
-          <latest>1577865600</latest>
+          <query>|inputlookup concerts.csv | convert timeformat="%B %d %Y" mktime(date)  AS _time | search _time&gt;=1577836800 _time&lt;1609459199 | timechart span=1mon count</query>
+          <earliest>1577836800</earliest>
+    <latest>1609459199</latest>
           <sampleRatio>1</sampleRatio>
         </search>
         <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
@@ -369,9 +411,9 @@
       <title>Number of artists seen live by month</title>
       <chart>
         <search>
-          <query>|inputlookup concerts.csv | convert timeformat="%B %d %Y" mktime(date)  AS _time | search _time&gt;=1262304000 _time&lt;1577865600 |makemv artist delim="," | mvexpand artist | timechart span=1mon count(artist)</query>
-          <earliest>1546329600</earliest>
-          <latest>1577865600</latest>
+          <query>|inputlookup concerts.csv | convert timeformat="%B %d %Y" mktime(date)  AS _time | search _time&gt;=1577836800 _time&lt;1609459199 |makemv artist delim="," | mvexpand artist | timechart span=1mon count(artist)</query>
+          <earliest>1577836800</earliest>
+    <latest>1609459199</latest>
           <sampleRatio>1</sampleRatio>
         </search>
         <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
@@ -411,12 +453,27 @@
   </row>
   <row>
     <panel>
-      <title>Artists seen more than twice in concert in the 2010s</title>
+      <title>Artists seen live in 2020</title>
       <table>
         <search>
-          <query>|inputlookup concerts.csv | convert timeformat="%B %d %Y" mktime(date)  AS _time | search _time&gt;=1262304000 _time&lt;1577865600 |makemv artist delim="," | mvexpand artist | stats count(artist) as artistcount by artist  | sort -artistcount | search artistcount&gt;2</query>
-          <earliest>1514793600</earliest>
-          <latest>1546329600</latest>
+          <query>|inputlookup concerts.csv | convert timeformat="%B %d %Y" mktime(date)  AS _time | search _time&gt;=1577836800 _time&lt;1609459199 | makemv artist delim="," | mvexpand artist</query>
+          <earliest>1577836800</earliest>
+    <latest>1609459199</latest>
+        </search>
+        <option name="count">10</option>
+        <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Artists seen more than once in concert in 2020</title>
+      <table>
+        <search>
+          <query>|inputlookup concerts.csv | convert timeformat="%B %d %Y" mktime(date)  AS _time | search _time&gt;=1577836800 _time&lt;1609459199 |makemv artist delim="," | mvexpand artist | stats count(artist) as artistcount by artist  | sort -artistcount | search artistcount&gt;1</query>
+          <earliest>1577836800</earliest>
+    <latest>1609459199</latest>
           <sampleRatio>1</sampleRatio>
         </search>
         <option name="count">20</option>
@@ -430,10 +487,10 @@
       </table>
     </panel>
     <panel>
-      <title>Venues Visited more than twice in the 2010s</title>
+      <title>Venues Visited in 2020</title>
       <table>
         <search>
-          <query>| inputlookup concerts.csv | convert timeformat="%B %d %Y" mktime(date)  AS _time | search _time&gt;=1262304000 _time&lt;1577865600 | stats count by venue,city,state | search count&gt;2 | sort -count</query>
+          <query>| inputlookup concerts.csv | convert timeformat="%B %d %Y" mktime(date)  AS _time | search _time&gt;=1577836800 _time&lt;1609459199 | stats count by venue,city,state | sort -count</query>
           <earliest>-1y@y</earliest>
           <latest>@y</latest>
           <sampleRatio>1</sampleRatio>
@@ -451,28 +508,102 @@
   </row>
   <row>
     <panel>
-      <title>Bands discovered in the 2010s</title>
+      <title>Listens and First Discovery for my Spotify Top 100 Songs</title>
+      <table>
+        <search base="baseSearch">
+          <query>lookup spotify2020.csv track_name,artist OUTPUT track_name,artist | makemv artist delim=", " | mvexpand artist | lookup earliesttracklistens.csv track_name,artist OUTPUTNEW earliestlisten as first_discovered | fields artist,track_name,first_discovered | eval first_discovered=strftime(first_discovered, "%B %d, %Y %H:%M:%S") | stats sum(count) as count by track_name, artist,first_discovered | sort -count | dedup track_name,artist</query>
+        </search>
+        <option name="count">20</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="percentagesRow">false</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+    <panel>
+      <title>Top 100 songs according to Spotify</title>
+      <table>
+        <search>
+          <query>|inputlookup spotify2020.csv | fields track_name,artist,album</query>
+          <earliest>1577836800</earliest>
+    <latest>1609459199</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">20</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="percentagesRow">false</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Total Artists Discovered in 2020</title>
       <single>
         <search>
-          <query>`lastfm_earliest` | search earliestyear IN (2010,2011,2012,2013,2014,2015,2016,2017,2018,2019) | stats count</query>
+          <query>`lastfm_earliest` | search earliestyear=2020 | stats count</query>
+          <earliest>0</earliest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="colorBy">value</option>
+        <option name="colorMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="numberPrecision">0</option>
+        <option name="rangeColors">["0x53a051", "0x0877a6", "0xf8be34", "0xf1813f", "0xdc4e41"]</option>
+        <option name="rangeValues">[0,30,70,100]</option>
+        <option name="showSparkline">1</option>
+        <option name="showTrendIndicator">1</option>
+        <option name="trellis.enabled">0</option>
+        <option name="trellis.scales.shared">1</option>
+        <option name="trellis.size">medium</option>
+        <option name="trendColorInterpretation">standard</option>
+        <option name="trendDisplayMode">absolute</option>
+        <option name="unitPosition">after</option>
+        <option name="useColors">0</option>
+        <option name="useThousandSeparators">1</option>
+      </single>
+    </panel>
+    <panel>
+      <title>Artists discovered in 2020</title>
+      <table>
+        <search>
+          <query>`lastfm_earliest` | search earliestyear=2020 | stats count sparkline(count,30d) as listenspattern  by artist | where count &gt; 10 | lookup earliestlistens.csv artist OUTPUTNEW earliestlisten as first_discovered | sort first_discovered,count | eval first_discovered=strftime(first_discovered, "%B %d, %Y %H:%M:%S")</query>
           <earliest>0</earliest>
           <latest></latest>
           <sampleRatio>1</sampleRatio>
         </search>
+        <option name="count">100</option>
+        <option name="dataOverlayMode">none</option>
         <option name="drilldown">none</option>
+        <option name="percentagesRow">false</option>
         <option name="refresh.display">progressbar</option>
-      </single>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
     </panel>
+  </row>
+  <row>
     <panel>
-      <title>Most popular artists discovered in the 2010s</title>
+      <title>Top 10 Songs 2020 - Bonus Metadata</title>
       <table>
-        <search>
-          <query>`lastfm_earliest` | search earliestyear IN (2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019) | stats count by artist | search count&gt;100 | sort -count</query>
-          <earliest>0</earliest>
-          <latest></latest>
+        <search base="baseSearch">
+          <query>stats sum(count) as listens sparkline(count,30d) as listenspattern by track_name,artist,album | lookup earliesttracklistens.csv track_name,artist OUTPUTNEW track_name,earliestlisten as first_discovered | eval first_discovered=strftime(first_discovered, "%B %d, %Y %H:%M:%S") | sort -listens limit=10</query>
         </search>
+        <option name="count">20</option>
+        <option name="dataOverlayMode">none</option>
         <option name="drilldown">none</option>
-        <option name="refresh.display">progressbar</option>
+        <option name="percentagesRow">false</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
       </table>
     </panel>
   </row>

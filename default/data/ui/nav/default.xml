@@ -7,18 +7,26 @@
     <view name="itunes_stats"/>
     <view name="listen_habit_stats"/>
     <view name="dance_music_analysis"/>
-    <view name="coronavirus_pandemic_listening_habits"/>
+     <view name="coronavirus_pandemic_listening_habits"/>
+     <view name="artist_analysis"/>
+     <view name="who_should_i_see"/>
+     <view name="should_i_stay_or_should_i_go"/>     
   </collection>
    <collection label="Time Analysis">
     <view name="top_of_all_time"/>
     <view name="2017_music"/>
     <view name="2018_music"/>
-    <view name="2019_music"/>
-    <view name="2010s_music"/>
+     <view name="2019_music"/>
+     <view name="2020_music"/>
+     <view name="2021_music"/>
+     <view name="2021_music_DS"/>
+     <view name="2022_music_unedited"/>
+     <view name="2022_music__match_spotify"/>
+     <view name="2010s_music"/>
   </collection>
   <collection label="WIP">
     <view name="music_wip"/>
-    <view name="upcoming_concerts"/>
+    <view name="artist_analysis" />
     <view name="year_music"/>
     <view name="ml_music"/>
     <view name="college_listening_diversity"/>
@@ -26,7 +34,6 @@
   <collection label="Concerts">
     <view name="concert_statistics"/>
     <view name="more_concert_statistics"/>
-    <view name="who_should_i_see"/>
     <view name="songkick_concerts"/>
   </collection>
   <collection label="Splunk Default Views">

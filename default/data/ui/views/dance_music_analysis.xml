@@ -1,11 +1,11 @@
-<dashboard>
+<dashboard version="1.1">
   <label>Dance Music Analysis</label>
   <row>
     <panel>
       <title>Average BPM All Time</title>
       <single>
         <search>
-          <query>index=music sourcetype=itunes_xml | fields BPM | where BPM &lt; 200 | stats avg(BPM) as avg_bpm | eval average_bpm=round(avg_bpm) | table average_bpm</query>
+          <query>`itunes` | fields BPM | where BPM &lt; 200 | stats avg(BPM) as avg_bpm | eval average_bpm=round(avg_bpm) | table average_bpm</query>
           <earliest>0</earliest>
           <latest></latest>
           <sampleRatio>1</sampleRatio>
@@ -96,7 +96,7 @@
       <title>Average BPM in Library Over Time</title>
       <chart>
         <search>
-          <query>index=music sourcetype=itunes_xml | fields BPM | where BPM &lt; 200 | timechart avg(BPM) as avg_bpm | eval average_bpm=round(avg_bpm)</query>
+          <query>`itunes` | fields BPM | where BPM &lt; 200 | timechart avg(BPM) as avg_bpm | eval average_bpm=round(avg_bpm)</query>
           <earliest>0</earliest>
           <latest></latest>
           <sampleRatio>1</sampleRatio>

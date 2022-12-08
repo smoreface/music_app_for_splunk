@@ -1,4 +1,4 @@
-<dashboard>
+<dashboard version="1.1">
   <label>Splunking Music</label>
   <description>Monitoring the add-on status with metrics from the last hour, last day, and last week.</description>
   <row>

@@ -1,8 +1,9 @@
 <panel>
-  <title>Average Difference In Days Between Date Added and First Listen</title>
   <single>
     <search>
-      <query>| inputlookup earliesttracklistens.csv |table track_name,earliestlisten | appendcols [| search `itunes` | table date_added ] | eval added=round(strptime(date_added,"%Y-%m-%dT%H:%M:%SZ")) | eval diff = (added-earliestlisten) | eval diff=round(diff/86400) | stats avg(diff) as average | eval average= abs(round(average))</query>
+      <query>`lastfm_earliest` |search earliestyear IN (2020,2019,2018) | eval month=strftime(_time, "%-m") | stats count by artist,month,earliestyear | stats min(month) as earliest_month by artist,earliestyear | search earliest_month IN (3,4,5,6,7,8) | eval when=earliest_month." ".earliestyear | stats count by earliestyear | delta count as discovery | eval percentage_growth=round((discovery*100)/(count-discovery),2) | fields earliestyear,discovery,percentage_growth,count
+| sort -earliestyear 
+|  fields percentage_growth</query>
       <earliest>0</earliest>
       <latest></latest>
       <sampleRatio>1</sampleRatio>
@@ -11,7 +12,7 @@
     <option name="colorMode">none</option>
     <option name="drilldown">none</option>
     <option name="numberPrecision">0</option>
-    <option name="rangeColors">["0x65a637","0x6db7c6","0xf7bc38","0xf58f39","0xd93f3c"]</option>
+    <option name="rangeColors">["0x53a051","0x0877a6","0xf8be34","0xf1813f","0xdc4e41"]</option>
     <option name="rangeValues">[0,30,70,100]</option>
     <option name="refresh.display">progressbar</option>
     <option name="showSparkline">1</option>
@@ -21,7 +22,8 @@
     <option name="trellis.size">medium</option>
     <option name="trendColorInterpretation">standard</option>
     <option name="trendDisplayMode">absolute</option>
-    <option name="unit">days</option>
+    <option name="underLabel">percent increase compared with artist discovery during this period last year</option>
+    <option name="unit">%</option>
     <option name="unitPosition">after</option>
     <option name="useColors">0</option>
     <option name="useThousandSeparators">1</option>
