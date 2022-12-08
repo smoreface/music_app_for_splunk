@@ -2,7 +2,7 @@
   <title>Average Difference In Days Between Date Added and First Listen When Date Added Was First</title>
   <single>
     <search>
-      <query>| inputlookup earliesttracklistens.csv |table track_name,earliestlisten | appendcols [| search index=music sourcetype="itunes_xml" | table date_added |eval added=round(strptime(date_added,"%Y-%m-%dT%H:%M:%SZ")) ] | where added &lt; earliestlisten  | eval diff = (added-earliestlisten) | eval diff=round(diff/86400) | stats avg(diff) as average | eval average= abs(round(average))</query>
+      <query>| inputlookup earliesttracklistens.csv |table track_name,earliestlisten | appendcols [| search `itunes` | table date_added |eval added=round(strptime(date_added,"%Y-%m-%dT%H:%M:%SZ")) ] | where added &lt; earliestlisten  | eval diff = (added-earliestlisten) | eval diff=round(diff/86400) | stats avg(diff) as average | eval average= abs(round(average))</query>
       <earliest>0</earliest>
       <sampleRatio>1</sampleRatio>
     </search>

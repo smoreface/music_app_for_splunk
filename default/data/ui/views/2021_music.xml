@@ -1,18 +1,20 @@
 <dashboard version="1.1">
-  <label>2019 Music</label>
+  <label>2021 Music</label>
   <search id="baseSearch">
     <query>
-      `lastfm` | fields track_name,artist,album
+      `lastfm` | bin span=1mon _time | stats count by _time artist album track_name
     </query>
-    <earliest>1546329600</earliest>
-    <latest>1577865600</latest>
+    <earliest>1609488000</earliest>
+    <latest>1641023999</latest>
   </search>
   <row>
     <panel>
-      <title>Top 10 Artists of 2019</title>
+      <title>Top 10 Artists of 2021</title>
       <chart>
-        <search base="baseSearch">
-          <query>timechart count(artist) by artist useother=f usenull=f span=1mon | sort -count(artist)</query>
+        <search>
+          <query>`lastfm`| timechart count as listens by artist useother=f usenull=f span=1mon | sort -listens</query>
+          <earliest>1609488000</earliest>
+          <latest>1641023999</latest>
         </search>
         <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
         <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
@@ -54,7 +56,7 @@
       <title>Top 10 Artists</title>
       <table>
         <search base="baseSearch">
-          <query>stats count(artist) as listens by artist | sort -listens limit=10</query>
+          <query>stats sum(count) as listens by artist | sort -listens limit=10</query>
         </search>
         <option name="count">100</option>
         <option name="dataOverlayMode">none</option>
@@ -70,7 +72,7 @@
       <title>Top 10 Songs</title>
       <table>
         <search base="baseSearch">
-          <query>stats count(track_name) as listens by track_name,artist | sort -listens limit=10</query>
+          <query>stats sum(count) as listens by track_name,artist | sort -listens limit=10</query>
         </search>
         <option name="count">100</option>
         <option name="dataOverlayMode">none</option>
@@ -90,7 +92,7 @@
       <title>Top 10 Albums</title>
       <table>
         <search base="baseSearch">
-          <query>stats count(album) as listens by album,artist | sort -listens limit=10</query>
+          <query>stats sum(count) as listens by album,artist | sort -listens limit=10</query>
         </search>
         <option name="count">10</option>
         <option name="drilldown">none</option>
@@ -105,7 +107,7 @@
         <search>
           <query>`itunes` (artist="$artist$" OR track_name="$track_name$") | eval length=round('track_length'/1000), len=tostring(length, "duration") | rex field=len "00:(?&lt;l&gt;\d*:\d*)"| replace "00:" WITH "" IN l | rename l as track_length | table artist, track_name, album, genre,rating, release_date, date_added, Kind, track_length</query>
           <earliest>0</earliest>
-          <latest></latest>
+          <latest/>
           <sampleRatio>1</sampleRatio>
         </search>
         <option name="count">100</option>
@@ -124,7 +126,7 @@
       <title>Total Listens</title>
       <single>
         <search base="baseSearch">
-          <query>stats count</query>
+          <query>stats sum(count) as count</query>
         </search>
         <option name="colorBy">value</option>
         <option name="colorMode">none</option>
@@ -149,7 +151,7 @@
       <title>Minutes Listened to iTunes Library Songs</title>
       <single>
         <search base="baseSearch">
-          <query>stats count by track_name | sort -count | lookup itunestracklength.csv track_name OUTPUT track_length | eventstats min(track_length) as length by track_name | table track_name,length,count | eval tracklistentime=(length*count) | stats sum(tracklistentime) as total_duration_ms | eval total_mins=round('total_duration_ms'/60000), yr_mins=round('total_mins'/525600, 5) | fields total_mins</query>
+          <query>stats sum(count) as count by track_name | sort -count | lookup itunestracklength.csv track_name OUTPUT track_length | eventstats min(track_length) as length by track_name | table track_name,length,count | eval tracklistentime=(length*count) | stats sum(tracklistentime) as total_duration_ms | eval total_mins=round('total_duration_ms'/60000), yr_mins=round('total_mins'/525600, 5) | fields total_mins</query>
         </search>
         <option name="colorBy">value</option>
         <option name="colorMode">none</option>
@@ -172,12 +174,12 @@
       </single>
     </panel>
     <panel>
-      <title>Songs Purchased in 2019</title>
+      <title>Songs Purchased from iTunes in 2021</title>
       <single>
         <search>
           <query>`itunes` Kind="Purchased *" | stats count</query>
-          <earliest>1514793600</earliest>
-          <latest>1546329600</latest>
+          <earliest>1609488000</earliest>
+          <latest>1640980800</latest>
           <sampleRatio>1</sampleRatio>
         </search>
         <option name="colorBy">value</option>
@@ -203,12 +205,12 @@
   </row>
   <row>
     <panel>
-      <title>Top 20 Artists Discovered in 2019</title>
+      <title>Top 20 Artists Discovered in 2021</title>
       <table>
         <search>
-          <query>`lastfm_earliest` | search earliestyear=2019 | stats count sparkline(count,30d) as listenspattern  by artist | sort -count limit=20 | lookup earliestlistens.csv artist OUTPUTNEW earliestlisten as first_discovered | eval first_discovered=strftime(first_discovered, "%B %d, %Y %H:%M:%S")</query>
+          <query>`lastfm_earliest` | search earliestyear=2021 | stats count sparkline(count,30d) as listenspattern  by artist | sort -count limit=20 | lookup earliestlistens.csv artist OUTPUTNEW earliestlisten as first_discovered | eval first_discovered=strftime(first_discovered, "%B %d, %Y %H:%M:%S")</query>
           <earliest>0</earliest>
-          <latest></latest>
+          <latest/>
           <sampleRatio>1</sampleRatio>
         </search>
         <option name="count">20</option>
@@ -224,10 +226,10 @@
   </row>
   <row>
     <panel>
-      <title>Venues Visited for the First Time in 2019</title>
+      <title>Venues Visited for the First Time in 2021</title>
       <table>
         <search>
-          <query>| inputlookup concerts.csv | convert timeformat="%B %d %Y" mktime(date)  AS _time | eventstats count by venue,city,state  | search _time&gt;1546329600 _time&lt;1577865600 | search count=1 | sort _time | table venue,city,state,date</query>
+          <query>| inputlookup concerts.csv | convert timeformat="%B %d %Y" mktime(date)  AS _time | eventstats count by venue,city,state  | search _time&gt;=1609488000 _time&lt;1641023999 | search count=1 | sort _time | table venue,city,state,date</query>
           <earliest>-1y@y</earliest>
           <latest>@y</latest>
           <sampleRatio>1</sampleRatio>
@@ -245,10 +247,10 @@
   </row>
   <row>
     <panel>
-      <title>Total Spent on Concerts Attended in 2019</title>
+      <title>Total Spent on Concerts Attended in 2021</title>
       <single>
         <search>
-          <query>|inputlookup ticketpurchase.csv | convert timeformat="%B %d %Y" mktime(concert_date)  AS _time | search _time&gt;=1546329600 _time&lt;1577865600| eval cost=coalesce(cost, face_value) | table artist,cost,face_value | search [|inputlookup concerts.csv | makemv artist delim="," | mvexpand artist| table artist] | stats sum(cost)</query>
+          <query>|inputlookup ticketpurchase.csv | convert timeformat="%B %d %Y" mktime(concert_date)  AS _time | search _time&gt;=1609488000 _time&lt;1641023999| eval cost=coalesce(cost, face_value) | table artist,cost,face_value | search [|inputlookup concerts.csv | makemv artist delim="," | mvexpand artist| table artist] | stats sum(cost)</query>
           <earliest>-24h@h</earliest>
           <latest>now</latest>
           <sampleRatio>1</sampleRatio>
@@ -274,10 +276,10 @@
       </single>
     </panel>
     <panel>
-      <title>Total Concerts in 2019</title>
+      <title>Total Concerts in 2021</title>
       <single>
         <search>
-          <query>|inputlookup concerts.csv | convert timeformat="%B %d %Y" mktime(date)  AS _time | search _time&gt;=1546329600 _time&lt;1577865600 | stats count</query>
+          <query>|inputlookup concerts.csv | convert timeformat="%B %d %Y" mktime(date)  AS _time | search _time&gt;=1609488000 _time&lt;1641023999 | stats count</query>
           <earliest>-24h@h</earliest>
           <latest>now</latest>
           <sampleRatio>1</sampleRatio>
@@ -303,10 +305,10 @@
       </single>
     </panel>
     <panel>
-      <title>Artists Seen in Concert in 2019</title>
+      <title>Artists Seen in Concert in 2021</title>
       <single>
         <search>
-          <query>|inputlookup concerts.csv | convert timeformat="%B %d %Y" mktime(date)  AS _time | search _time&gt;=1546329600 _time&lt;1577865600 |makemv artist delim="," | mvexpand artist | stats count</query>
+          <query>|inputlookup concerts.csv | convert timeformat="%B %d %Y" mktime(date)  AS _time | search _time&gt;=1609488000 _time&lt;1641023999 |makemv artist delim="," | mvexpand artist | stats count</query>
           <earliest>1514793600</earliest>
           <latest>1546329600</latest>
           <sampleRatio>1</sampleRatio>
@@ -332,10 +334,10 @@
       </single>
     </panel>
     <panel>
-      <title>Total Spent on Concert Tickets in 2019</title>
+      <title>Total Spent on Concert Tickets in 2021</title>
       <single>
         <search>
-          <query>|inputlookup ticketpurchase.csv | convert timeformat="%B %d %Y" mktime(purchase_date)  AS _time | search _time&gt;=1546329600 _time&lt;1577865600 | eval cost=coalesce(cost, face_value) | table artist,cost,face_value | stats sum(cost)</query>
+          <query>|inputlookup ticketpurchase.csv | convert timeformat="%B %d %Y" mktime(purchase_date)  AS _time | search _time&gt;=1609488000 _time&lt;1641023999 | eval cost=coalesce(cost, face_value) | fields artist,cost,face_value | stats sum(cost)</query>
           <earliest>-24h@h</earliest>
           <latest>now</latest>
           <sampleRatio>1</sampleRatio>
@@ -366,9 +368,9 @@
       <title>Number of concerts per month</title>
       <chart>
         <search>
-          <query>|inputlookup concerts.csv | convert timeformat="%B %d %Y" mktime(date)  AS _time | search _time&gt;=1546329600 _time&lt;1577865600 | timechart span=1mon count</query>
-          <earliest>1546329600</earliest>
-          <latest>1577865600</latest>
+          <query>|inputlookup concerts.csv | convert timeformat="%B %d %Y" mktime(date)  AS _time | search _time&gt;=1609488000 _time&lt;1641023999 | timechart span=1mon count</query>
+          <earliest>1577836800</earliest>
+          <latest>1609459199</latest>
           <sampleRatio>1</sampleRatio>
         </search>
         <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
@@ -411,9 +413,9 @@
       <title>Number of artists seen live by month</title>
       <chart>
         <search>
-          <query>|inputlookup concerts.csv | convert timeformat="%B %d %Y" mktime(date)  AS _time | search _time&gt;=1546329600 _time&lt;1577865600 |makemv artist delim="," | mvexpand artist | timechart span=1mon count(artist)</query>
-          <earliest>1546329600</earliest>
-          <latest>1577865600</latest>
+          <query>|inputlookup concerts.csv | convert timeformat="%B %d %Y" mktime(date)  AS _time | search _time&gt;=1609488000 _time&lt;1641023999 |makemv artist delim="," | mvexpand artist | timechart span=1mon count(artist)</query>
+          <earliest>1577836800</earliest>
+          <latest>1609459199</latest>
           <sampleRatio>1</sampleRatio>
         </search>
         <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
@@ -453,12 +455,12 @@
   </row>
   <row>
     <panel>
-      <title>Artists seen live in 2019</title>
+      <title>Artists seen live in 2021</title>
       <table>
         <search>
-          <query>|inputlookup concerts.csv | convert timeformat="%B %d %Y" mktime(date)  AS _time | search _time&gt;=1546329600 _time&lt;1577865600 | makemv artist delim="," | mvexpand artist</query>
-          <earliest>1546329600</earliest>
-          <latest>1577865600</latest>
+          <query>|inputlookup concerts.csv | convert timeformat="%B %d %Y" mktime(date)  AS _time | search _time&gt;=1609488000 _time&lt;1641023999 | makemv artist delim="," | mvexpand artist</query>
+          <earliest>1577836800</earliest>
+          <latest>1609459199</latest>
         </search>
         <option name="count">10</option>
         <option name="drilldown">none</option>
@@ -468,12 +470,12 @@
   </row>
   <row>
     <panel>
-      <title>Artists seen more than once in concert in 2019</title>
+      <title>Artists seen more than once in concert in 2021</title>
       <table>
         <search>
-          <query>|inputlookup concerts.csv | convert timeformat="%B %d %Y" mktime(date)  AS _time | search _time&gt;=1546329600 _time&lt;1577865600 |makemv artist delim="," | mvexpand artist | stats count(artist) as artistcount by artist  | sort -artistcount | search artistcount&gt;1</query>
-          <earliest>1514793600</earliest>
-          <latest>1546329600</latest>
+          <query>|inputlookup concerts.csv | convert timeformat="%B %d %Y" mktime(date)  AS _time | search _time&gt;=1609488000 _time&lt;1641023999 |makemv artist delim="," | mvexpand artist | stats count(artist) as artistcount by artist  | sort -artistcount | search artistcount&gt;1</query>
+          <earliest>1577836800</earliest>
+          <latest>1609459199</latest>
           <sampleRatio>1</sampleRatio>
         </search>
         <option name="count">20</option>
@@ -487,10 +489,10 @@
       </table>
     </panel>
     <panel>
-      <title>Venues Visited in 2019</title>
+      <title>Venues Visited in 2021</title>
       <table>
         <search>
-          <query>| inputlookup concerts.csv | convert timeformat="%B %d %Y" mktime(date)  AS _time | search _time&gt;=1546329600 _time&lt;1577865600 | stats count by venue,city,state | sort -count</query>
+          <query>| inputlookup concerts.csv | convert timeformat="%B %d %Y" mktime(date)  AS _time | search _time&gt;=1609488000 _time&lt;1641023999 | stats count by venue,city,state | sort -count</query>
           <earliest>-1y@y</earliest>
           <latest>@y</latest>
           <sampleRatio>1</sampleRatio>
@@ -511,7 +513,7 @@
       <title>Listens and First Discovery for my Spotify Top 100 Songs</title>
       <table>
         <search base="baseSearch">
-          <query>lookup spotify2019.csv track_name,artist OUTPUT track_name,artist | makemv artist delim=", " | mvexpand artist | lookup earliesttracklistens.csv track_name,artist OUTPUTNEW earliestlisten as first_discovered | fields artist,track_name,first_discovered | eval first_discovered=strftime(first_discovered, "%B %d, %Y %H:%M:%S") | stats count by track_name, artist,first_discovered | sort -count | dedup track_name,artist</query>
+          <query>lookup spotify2021.csv track_name,artist OUTPUT track_name,artist | makemv artist delim=", " | mvexpand artist | lookup earliesttracklistens.csv track_name,artist OUTPUTNEW earliestlisten as first_discovered | fields artist,track_name,first_discovered | eval first_discovered=strftime(first_discovered, "%B %d, %Y %H:%M:%S") | stats sum(count) as count by track_name, artist,first_discovered | sort -count | dedup track_name,artist</query>
         </search>
         <option name="count">20</option>
         <option name="dataOverlayMode">none</option>
@@ -527,9 +529,9 @@
       <title>Top 100 songs according to Spotify</title>
       <table>
         <search>
-          <query>|inputlookup spotify2019.csv | fields track_name,artist,album</query>
-          <earliest>1514793600</earliest>
-          <latest>1546329600</latest>
+          <query>|inputlookup spotify2021.csv | fields track_name,artist,album</query>
+          <earliest>1577836800</earliest>
+          <latest>1609459199</latest>
           <sampleRatio>1</sampleRatio>
         </search>
         <option name="count">20</option>
@@ -545,11 +547,123 @@
   </row>
   <row>
     <panel>
-      <title>Total Artists Discovered in 2019</title>
+      <title>Total Artists Discovered in 2021</title>
       <single>
         <search>
-          <query>`lastfm_earliest` | search earliestyear=2019 | stats count</query>
+          <query>`lastfm_earliest` | search earliestyear=2021 | stats count</query>
           <earliest>0</earliest>
+          <latest/>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="colorBy">value</option>
+        <option name="colorMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="numberPrecision">0</option>
+        <option name="rangeColors">["0x53a051", "0x0877a6", "0xf8be34", "0xf1813f", "0xdc4e41"]</option>
+        <option name="rangeValues">[0,30,70,100]</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="showSparkline">1</option>
+        <option name="showTrendIndicator">1</option>
+        <option name="trellis.enabled">0</option>
+        <option name="trellis.scales.shared">1</option>
+        <option name="trellis.size">medium</option>
+        <option name="trendColorInterpretation">standard</option>
+        <option name="trendDisplayMode">absolute</option>
+        <option name="unitPosition">after</option>
+        <option name="useColors">0</option>
+        <option name="useThousandSeparators">1</option>
+      </single>
+    </panel>
+    <panel>
+      <title>Artists discovered in 2021</title>
+      <table>
+        <search>
+          <query>`lastfm_earliest` | search earliestyear=2021 | stats count sparkline(count,30d) as listenspattern  by artist | where count &gt; 10 | lookup earliestlistens.csv artist OUTPUTNEW earliestlisten as first_discovered | sort first_discovered,count | eval first_discovered=strftime(first_discovered, "%B %d, %Y %H:%M:%S")</query>
+          <earliest>0</earliest>
+          <latest/>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">100</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="percentagesRow">false</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Top 10 Songs 2021 - Bonus Metadata</title>
+      <table>
+        <search base="baseSearch">
+          <query>stats sum(count) as listens sparkline(count,30d) as listenspattern by track_name,artist,album | lookup earliesttracklistens.csv track_name,artist OUTPUTNEW track_name,earliestlisten as first_discovered | eval first_discovered=strftime(first_discovered, "%B %d, %Y %H:%M:%S") | sort -listens limit=10</query>
+        </search>
+        <option name="count">20</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="percentagesRow">false</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Average Track BPM by Month</title>
+      <chart>
+        <search>
+          <query>`lastfm` | table track_name,artist,_time | lookup trackbpm.csv track_name OUTPUT BPM | search BPM!="" | table BPM, track_name, _time | where BPM &lt; 200 | timechart avg(BPM) as avg_bpm span=1w  | eval avg_bpm=round(avg_bpm)</query>
+          <earliest>1609488000</earliest>
+          <latest>1641024000</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.abbreviation">none</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.abbreviation">none</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.abbreviation">none</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">line</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.mode">standard</option>
+        <option name="charting.legend.placement">right</option>
+        <option name="charting.lineWidth">2</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="trellis.enabled">0</option>
+        <option name="trellis.scales.shared">1</option>
+        <option name="trellis.size">medium</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Average BPM (Mean)</title>
+      <single>
+        <search>
+          <query>`itunes` | fields BPM | where BPM &lt; 200 | stats avg(BPM) as avg_bpm | eval average_bpm=round(avg_bpm) | table average_bpm</query>
+          <earliest>1609488000</earliest>
+          <latest>1641024000</latest>
           <sampleRatio>1</sampleRatio>
         </search>
         <option name="colorBy">value</option>
@@ -571,40 +685,209 @@
       </single>
     </panel>
     <panel>
-      <title>Artists discovered in 2019</title>
-      <table>
+      <title>Average BPM (Median)</title>
+      <single>
         <search>
-          <query>`lastfm_earliest` | search earliestyear=2019 | stats count sparkline(count,30d) as listenspattern  by artist | where count &gt; 10 | lookup earliestlistens.csv artist OUTPUTNEW earliestlisten as first_discovered | sort first_discovered,count | eval first_discovered=strftime(first_discovered, "%B %d, %Y %H:%M:%S")</query>
-          <earliest>0</earliest>
-          <latest></latest>
+          <query>`itunes` | fields BPM | where BPM &lt; 200 | stats median(BPM) as avg_bpm | eval average_bpm=round(avg_bpm) | table average_bpm</query>
+          <earliest>1609488000</earliest>
+          <latest>1641024000</latest>
           <sampleRatio>1</sampleRatio>
         </search>
-        <option name="count">100</option>
-        <option name="dataOverlayMode">none</option>
+        <option name="colorBy">value</option>
+        <option name="colorMode">none</option>
         <option name="drilldown">none</option>
-        <option name="percentagesRow">false</option>
-        <option name="refresh.display">progressbar</option>
-        <option name="rowNumbers">false</option>
-        <option name="totalsRow">false</option>
-        <option name="wrap">true</option>
-      </table>
+        <option name="numberPrecision">0</option>
+        <option name="rangeColors">["0x53a051", "0x0877a6", "0xf8be34", "0xf1813f", "0xdc4e41"]</option>
+        <option name="rangeValues">[0,30,70,100]</option>
+        <option name="showSparkline">1</option>
+        <option name="showTrendIndicator">1</option>
+        <option name="trellis.enabled">0</option>
+        <option name="trellis.scales.shared">1</option>
+        <option name="trellis.size">medium</option>
+        <option name="trendColorInterpretation">standard</option>
+        <option name="trendDisplayMode">absolute</option>
+        <option name="unitPosition">after</option>
+        <option name="useColors">0</option>
+        <option name="useThousandSeparators">1</option>
+      </single>
+    </panel>
+    <panel>
+      <title>Average BPM (Mode)</title>
+      <single>
+        <search>
+          <query>`itunes` | fields BPM | where BPM &lt; 200 | stats mode(BPM) as avg_bpm | eval average_bpm=round(avg_bpm) | table average_bpm</query>
+          <earliest>1609488000</earliest>
+          <latest>1641024000</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="colorBy">value</option>
+        <option name="colorMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="numberPrecision">0</option>
+        <option name="rangeColors">["0x53a051", "0x0877a6", "0xf8be34", "0xf1813f", "0xdc4e41"]</option>
+        <option name="rangeValues">[0,30,70,100]</option>
+        <option name="showSparkline">1</option>
+        <option name="showTrendIndicator">1</option>
+        <option name="trellis.enabled">0</option>
+        <option name="trellis.scales.shared">1</option>
+        <option name="trellis.size">medium</option>
+        <option name="trendColorInterpretation">standard</option>
+        <option name="trendDisplayMode">absolute</option>
+        <option name="unitPosition">after</option>
+        <option name="useColors">0</option>
+        <option name="useThousandSeparators">1</option>
+      </single>
     </panel>
   </row>
   <row>
     <panel>
-      <title>Top 10 Songs 2019 - Bonus Metadata</title>
-      <table>
-        <search base="baseSearch">
-          <query>stats count(track_name) as listens sparkline(count,30d) as listenspattern by track_name,artist,album | lookup earliesttracklistens.csv track_name,artist OUTPUTNEW track_name,earliestlisten as first_discovered | eval first_discovered=strftime(first_discovered, "%B %d, %Y %H:%M:%S") | sort -listens limit=10</query>
+      <title>Weekday Listening Habits</title>
+      <chart>
+        <search>
+          <query>`lastfm` | eval sort_field=case(date_wday=="monday", 2, date_wday=="tuesday", 3, date_wday=="wednesday", 4, date_wday=="thursday", 5, date_wday=="friday", 6, date_wday=="saturday", 7, date_wday=="sunday", 1)  |timechart span=1mon count by sort_field usenull=f
+|  rename 2 AS monday, 3 AS tuesday, 4 AS wednesday, 5 AS thursday, 6 AS friday, 7 AS saturday, 1 AS sunday</query>
+          <earliest>1609488000</earliest>
+          <latest>1641024000</latest>
+          <sampleRatio>1</sampleRatio>
         </search>
-        <option name="count">20</option>
-        <option name="dataOverlayMode">none</option>
-        <option name="drilldown">none</option>
-        <option name="percentagesRow">false</option>
-        <option name="rowNumbers">false</option>
-        <option name="totalsRow">false</option>
-        <option name="wrap">true</option>
-      </table>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.abbreviation">none</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.abbreviation">none</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.abbreviation">none</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">column</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.mode">standard</option>
+        <option name="charting.legend.placement">right</option>
+        <option name="charting.lineWidth">2</option>
+        <option name="trellis.enabled">0</option>
+        <option name="trellis.scales.shared">1</option>
+        <option name="trellis.size">medium</option>
+        <option name="trellis.splitBy">sort_field</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Weekday Listening Habits YoY</title>
+      <chart>
+        <search>
+          <query>`lastfm` | timechart span=1d count as listen | eval listen_length=(listen*240) 
+|inputlookup append=t concerthistoryparse.csv 
+| eval show_length=case(info == "festival", "28800", info == "dj set", "14400", info == "concert", "10800") | convert timeformat="%B %d %Y" mktime(date) AS _time 
+| eval length=round(coalesce(listen_length,show_length)/60) 
+| eval month=strftime(_time, "%-m"), year=strftime(_time, "%Y"), sort_field=strftime(_time, "%w")
+| search year IN (2019,2020,2021)
+| chart sum(length) as total_minutes_listened by year,sort_field
+|  rename 0 AS sunday 1 AS monday, 2 AS tuesday, 3 AS wednesday, 4 AS thursday, 5 AS friday, 6 AS saturday</query>
+          <earliest>-3y@y</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.abbreviation">none</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.abbreviation">none</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.abbreviation">none</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">column</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.mode">standard</option>
+        <option name="charting.legend.placement">right</option>
+        <option name="charting.lineWidth">2</option>
+        <option name="trellis.enabled">0</option>
+        <option name="trellis.scales.shared">1</option>
+        <option name="trellis.size">medium</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Time of Day Listening Patterns YoY</title>
+      <chart>
+        <search>
+          <query>`lastfm` | timechart span=1h count as listen | eval listen_length=(listen*240) 
+|inputlookup append=t concerthistoryparse.csv 
+| eval show_length=case(info == "festival", "28800", info == "dj set", "14400", info == "concert", "10800") | convert timeformat="%B %d %Y" mktime(date) AS _time 
+| eval length=round(coalesce(listen_length,show_length)/60) 
+| eval month=strftime(_time, "%-m"), year=strftime(_time, "%Y"), weekday=strftime(_time, "%w"), hour=strftime(_time, "%H")
+| search year IN (2019,2020,2021)
+|  eval time_of_day=case(in(hour,"10","11","12","13","14","15","16","17"),"probsworkday", in(hour,"18","19","20","21","22"), "4", in(hour,"23","24","00"), "5", in(hour,"01","02","03","04","05","06","07"), "6", in(hour,"08","09"), "1")
+|  eval time_of_day=case((time_of_day=="probsworkday" AND in(weekday,"1","2","3","4","5")), "2", (time_of_day=="probsworkday" AND in(weekday,"0","6")), "3", time_of_day!="probsworkday", time_of_day)
+| chart sum(length) as total_minutes_listened by year,time_of_day
+|  rename 1 as "wish_I_was_asleep", 2 as "workday", 3 as "weekend_chillin", 4 as "evening", 5 as "night_owl", 6 as "better_be_asleep"</query>
+          <earliest>-3y@y</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.abbreviation">none</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.abbreviation">none</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.abbreviation">none</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">column</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.mode">standard</option>
+        <option name="charting.legend.placement">right</option>
+        <option name="charting.lineWidth">2</option>
+        <option name="trellis.enabled">0</option>
+        <option name="trellis.scales.shared">1</option>
+        <option name="trellis.size">medium</option>
+        <option name="trellis.splitBy">time_of_day</option>
+      </chart>
     </panel>
   </row>
 </dashboard>

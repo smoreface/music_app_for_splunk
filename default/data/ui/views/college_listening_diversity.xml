@@ -1,4 +1,4 @@
-<dashboard>
+<dashboard version="1.1">
   <label>College Listening Diversity</label>
   <row>
     <panel ref="how_many_songs_did_i_listen_to_just_once_versus_how_many_songs_i_listened_to_multiple_times"></panel>

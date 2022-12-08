@@ -1,19 +1,17 @@
 <panel>
-  <title>Average Difference In Days Between Date Added and First Listen</title>
   <single>
     <search>
-      <query>| inputlookup earliesttracklistens.csv |table track_name,earliestlisten | appendcols [| search `itunes` | table date_added ] | eval added=round(strptime(date_added,"%Y-%m-%dT%H:%M:%SZ")) | eval diff = (added-earliestlisten) | eval diff=round(diff/86400) | stats avg(diff) as average | eval average= abs(round(average))</query>
-      <earliest>0</earliest>
-      <latest></latest>
+      <query>| inputlookup livestreams.csv | stats count</query>
+      <earliest>-15m</earliest>
+      <latest>now</latest>
       <sampleRatio>1</sampleRatio>
     </search>
     <option name="colorBy">value</option>
     <option name="colorMode">none</option>
     <option name="drilldown">none</option>
     <option name="numberPrecision">0</option>
-    <option name="rangeColors">["0x65a637","0x6db7c6","0xf7bc38","0xf58f39","0xd93f3c"]</option>
+    <option name="rangeColors">["0x53a051","0x0877a6","0xf8be34","0xf1813f","0xdc4e41"]</option>
     <option name="rangeValues">[0,30,70,100]</option>
-    <option name="refresh.display">progressbar</option>
     <option name="showSparkline">1</option>
     <option name="showTrendIndicator">1</option>
     <option name="trellis.enabled">0</option>
@@ -21,7 +19,7 @@
     <option name="trellis.size">medium</option>
     <option name="trendColorInterpretation">standard</option>
     <option name="trendDisplayMode">absolute</option>
-    <option name="unit">days</option>
+    <option name="underLabel">total livestreams watched</option>
     <option name="unitPosition">after</option>
     <option name="useColors">0</option>
     <option name="useThousandSeparators">1</option>

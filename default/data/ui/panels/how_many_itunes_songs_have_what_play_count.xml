@@ -2,7 +2,7 @@
   <title>How Many iTunes Songs Have What Play Count?</title>
   <chart>
     <search>
-      <query>index=music sourcetype="itunes_xml" | fillnull play_count 0 | top limit=20 play_count</query>
+      <query>`itunes` | fillnull play_count 0 | top limit=20 play_count</query>
       <earliest>$earliest$</earliest>
       <latest>$latest$</latest>
     </search>

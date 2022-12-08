@@ -1,0 +1,33 @@
+<panel>
+  <single>
+    <search>
+      <query>`lastfm` | timechart count as listen span=1mon | eval listen_length=(listen*240) | inputlookup append=t livestreams.csv | convert dur2sec(length) as stream_length |convert timeformat="%B %d %Y" mktime(watch_date) AS _time |inputlookup append=t concerthistoryparse.csv | eval show_length=case(info == "festival", "28800", info == "dj set", "14400", info == "concert", "10800") | convert timeformat="%B %d %Y" mktime(date) AS _time | eval length=round(coalesce(listen_length,stream_length,show_length)/60) | eval month=strftime(_time, "%-m"), year=strftime(_time, "%Y")  | search month IN (3,4,5,6,7,8) | search year IN (2018,2019,2020) | stats sum(length) as length by year | delta length as change | eval percentage_growth=round((change*100)/(length-change),2) 
+| eval hours=round(length/60) 
+|  eval hours_diff=round(change/60) | fields year,length,percentage_growth ,change,hours,hours_diff
+|  sort -year
+| fields hours_diff</query>
+      <earliest>-3y@y</earliest>
+      <latest>now</latest>
+      <sampleRatio>1</sampleRatio>
+    </search>
+    <option name="colorBy">value</option>
+    <option name="colorMode">none</option>
+    <option name="drilldown">none</option>
+    <option name="numberPrecision">0</option>
+    <option name="rangeColors">["0x53a051","0x0877a6","0xf8be34","0xf1813f","0xdc4e41"]</option>
+    <option name="rangeValues">[0,30,70,100]</option>
+    <option name="refresh.display">progressbar</option>
+    <option name="showSparkline">1</option>
+    <option name="showTrendIndicator">1</option>
+    <option name="trellis.enabled">0</option>
+    <option name="trellis.scales.shared">1</option>
+    <option name="trellis.size">medium</option>
+    <option name="trendColorInterpretation">standard</option>
+    <option name="trendDisplayMode">absolute</option>
+    <option name="underLabel">more than this time period last year spent listening to music</option>
+    <option name="unit">hours</option>
+    <option name="unitPosition">after</option>
+    <option name="useColors">0</option>
+    <option name="useThousandSeparators">1</option>
+  </single>
+</panel>

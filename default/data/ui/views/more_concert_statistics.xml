@@ -1,4 +1,4 @@
-<dashboard>
+<dashboard version="1.1">
   <label>More Concert Statistics</label>
   <description>Creative name I know</description>
   <row>
@@ -7,7 +7,43 @@
     <panel ref="concert_listen_threshold" app="search"></panel>
   </row>
   <row>
-    <panel ref="most_concerts_by_state" app="search"></panel>
+    <panel>
+      <title>Most Concerts by State</title>
+      <map>
+        <search>
+          <query>| inputlookup concerthistoryparse.csv | stats count(state) by state | geom geo_us_states featureIdField="state"</query>
+          <earliest>-1y@y</earliest>
+          <latest>@y</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="mapping.choroplethLayer.colorBins">7</option>
+        <option name="mapping.choroplethLayer.colorMode">auto</option>
+        <option name="mapping.choroplethLayer.maximumColor">0x5A4575</option>
+        <option name="mapping.choroplethLayer.minimumColor">0xAF575A</option>
+        <option name="mapping.choroplethLayer.neutralPoint">0</option>
+        <option name="mapping.choroplethLayer.shapeOpacity">0.75</option>
+        <option name="mapping.choroplethLayer.showBorder">0</option>
+        <option name="mapping.data.maxClusters">100</option>
+        <option name="mapping.legend.placement">bottomright</option>
+        <option name="mapping.map.center">(39.1,-94.39)</option>
+        <option name="mapping.map.panning">1</option>
+        <option name="mapping.map.scrollZoom">0</option>
+        <option name="mapping.map.zoom">4</option>
+        <option name="mapping.markerLayer.markerMaxSize">50</option>
+        <option name="mapping.markerLayer.markerMinSize">10</option>
+        <option name="mapping.markerLayer.markerOpacity">0.8</option>
+        <option name="mapping.showTiles">1</option>
+        <option name="mapping.tileLayer.maxZoom">7</option>
+        <option name="mapping.tileLayer.minZoom">0</option>
+        <option name="mapping.tileLayer.tileOpacity">1</option>
+        <option name="mapping.tileLayer.url">http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png</option>
+        <option name="mapping.type">choropleth</option>
+        <option name="trellis.enabled">0</option>
+        <option name="trellis.scales.shared">1</option>
+        <option name="trellis.size">medium</option>
+      </map>
+    </panel>
   </row>
   <row>
     <panel ref="most_visited_venues" app="search"></panel>
@@ -120,6 +156,113 @@
         <option name="totalsRow">false</option>
         <option name="wrap">true</option>
       </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Density of Bay Area Music Venues</title>
+      <map>
+        <search>
+          <query>|inputlookup bayareavenues.csv | lookup geo_sf_neighborhoods latitude,longitude OUTPUTNEW featureId AS neighborhood
+                        | stats count(venue) as venue_density by neighborhood
+                        | geom geo_sf_neighborhoods featureIdField=neighborhood</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="mapping.choroplethLayer.colorBins">5</option>
+        <option name="mapping.choroplethLayer.colorMode">auto</option>
+        <option name="mapping.choroplethLayer.maximumColor">0x4FA484</option>
+        <option name="mapping.choroplethLayer.minimumColor">0x62b3b2</option>
+        <option name="mapping.choroplethLayer.neutralPoint">0</option>
+        <option name="mapping.choroplethLayer.shapeOpacity">0.75</option>
+        <option name="mapping.choroplethLayer.showBorder">1</option>
+        <option name="mapping.data.maxClusters">100</option>
+        <option name="mapping.legend.placement">bottomright</option>
+        <option name="mapping.map.center">(37.765,-122.44)</option>
+        <option name="mapping.map.panning">1</option>
+        <option name="mapping.map.scrollZoom">0</option>
+        <option name="mapping.map.zoom">12</option>
+        <option name="mapping.markerLayer.markerMaxSize">50</option>
+        <option name="mapping.markerLayer.markerMinSize">10</option>
+        <option name="mapping.markerLayer.markerOpacity">0.8</option>
+        <option name="mapping.showTiles">1</option>
+        <option name="mapping.tileLayer.maxZoom">19</option>
+        <option name="mapping.tileLayer.minZoom">0</option>
+        <option name="mapping.tileLayer.tileOpacity">1</option>
+        <option name="mapping.tileLayer.url">http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png</option>
+        <option name="mapping.type">choropleth</option>
+        <option name="trellis.enabled">0</option>
+        <option name="trellis.scales.shared">1</option>
+        <option name="trellis.size">medium</option>
+      </map>
+    </panel>
+    <panel>
+      <title>San Francisco Venue Visits by Neighborhood</title>
+      <map>
+        <search>
+          <query>|inputlookup concerts.csv
+| lookup bayareavenues.csv venue OUTPUT venue,latitude,longitude
+| lookup geo_sf_neighborhoods latitude,longitude OUTPUTNEW featureId AS neighborhood
+ | stats count(venue) as venue_visits by neighborhood
+ | geom geo_sf_neighborhoods featureIdField=neighborhood</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="mapping.choroplethLayer.colorBins">9</option>
+        <option name="mapping.choroplethLayer.maximumColor">0x5A4575</option>
+        <option name="mapping.legend.placement">none</option>
+        <option name="mapping.map.center">(37.77,-122.44)</option>
+        <option name="mapping.map.zoom">12</option>
+        <option name="mapping.tileLayer.maxZoom">19</option>
+        <option name="mapping.tileLayer.url">http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png</option>
+        <option name="mapping.type">choropleth</option>
+      </map>
+    </panel>
+    <panel>
+      <title>Neighborhood Popularity by Venue Visits and Density</title>
+      <map>
+        <search>
+          <query>|inputlookup concerts.csv
+| lookup bayareavenues.csv venue OUTPUT venue,latitude,longitude
+| lookup geo_sf_neighborhoods latitude,longitude OUTPUTNEW featureId AS neighborhood
+ | stats count(venue) as venue_visits dc(venue) as venue_density by neighborhood
+ | eval popularity=round((venue_visits/venue_density),2)
+ | fields popularity,neighborhood
+ | geom geo_sf_neighborhoods featureIdField=neighborhood</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="mapping.choroplethLayer.colorBins">5</option>
+        <option name="mapping.choroplethLayer.colorMode">auto</option>
+        <option name="mapping.choroplethLayer.maximumColor">0xaf575a</option>
+        <option name="mapping.choroplethLayer.minimumColor">0x62b3b2</option>
+        <option name="mapping.choroplethLayer.neutralPoint">0</option>
+        <option name="mapping.choroplethLayer.shapeOpacity">0.75</option>
+        <option name="mapping.choroplethLayer.showBorder">1</option>
+        <option name="mapping.data.maxClusters">100</option>
+        <option name="mapping.legend.placement">bottomright</option>
+        <option name="mapping.map.center">(37.77,-122.44)</option>
+        <option name="mapping.map.panning">1</option>
+        <option name="mapping.map.scrollZoom">0</option>
+        <option name="mapping.map.zoom">12</option>
+        <option name="mapping.markerLayer.markerMaxSize">50</option>
+        <option name="mapping.markerLayer.markerMinSize">10</option>
+        <option name="mapping.markerLayer.markerOpacity">0.8</option>
+        <option name="mapping.showTiles">1</option>
+        <option name="mapping.tileLayer.maxZoom">19</option>
+        <option name="mapping.tileLayer.minZoom">0</option>
+        <option name="mapping.tileLayer.tileOpacity">1</option>
+        <option name="mapping.tileLayer.url">http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png</option>
+        <option name="mapping.type">choropleth</option>
+        <option name="trellis.enabled">0</option>
+        <option name="trellis.scales.shared">1</option>
+        <option name="trellis.size">medium</option>
+      </map>
     </panel>
   </row>
 </dashboard>

@@ -1,4 +1,4 @@
-<form>
+<form version="1.1">
   <label>Who Should I See?</label>
   <description>Compare up to three artists to see who I should see live.</description>
   <fieldset submitButton="false">

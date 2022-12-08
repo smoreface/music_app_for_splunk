@@ -1,0 +1,19 @@
+<panel>
+  <title>Livestreams: Top 10 Artists by Number of Streams Watched</title>
+  <table>
+    <search>
+      <query>|inputlookup livestreams.csv | stats count as total_streams by artist | sort -total_streams limit=15</query>
+      <earliest>-3y</earliest>
+      <latest>now</latest>
+      <sampleRatio>1</sampleRatio>
+    </search>
+    <option name="count">20</option>
+    <option name="dataOverlayMode">none</option>
+    <option name="drilldown">none</option>
+    <option name="percentagesRow">false</option>
+    <option name="refresh.display">progressbar</option>
+    <option name="rowNumbers">false</option>
+    <option name="totalsRow">false</option>
+    <option name="wrap">true</option>
+  </table>
+</panel>

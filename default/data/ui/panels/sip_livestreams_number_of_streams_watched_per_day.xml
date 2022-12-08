@@ -1,15 +1,14 @@
 <panel>
-  <title>Average Difference In Days Between Date Added and First Listen Column Chart Frequency</title>
+  <title>Livestreams: Number of Streams Watched Per Day</title>
   <chart>
     <search>
-      <query>| inputlookup earliesttracklistens.csv |table track_name,earliestlisten | appendcols [| search `itunes` | table date_added ] | eval added=round(strptime(date_added,"%Y-%m-%dT%H:%M:%SZ")) | eval diff = (added-earliestlisten) | eval diff=round(diff/86400) | stats count as song_count by diff | sort -diff</query>
-      <earliest>0</earliest>
-      <latest></latest>
+      <query>|inputlookup livestreams.csv | convert timeformat="%B %d %Y" mktime(watch_date) AS _time | timechart count span=1d</query>
+      <earliest>1583049600</earliest>
+      <latest>now</latest>
       <sampleRatio>1</sampleRatio>
     </search>
     <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
     <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
-    <option name="charting.axisLabelsY.majorUnit">5</option>
     <option name="charting.axisTitleX.visibility">visible</option>
     <option name="charting.axisTitleY.visibility">visible</option>
     <option name="charting.axisTitleY2.visibility">visible</option>
@@ -28,7 +27,7 @@
     <option name="charting.chart.showDataLabels">none</option>
     <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
     <option name="charting.chart.stackMode">default</option>
-    <option name="charting.chart.style">minimal</option>
+    <option name="charting.chart.style">shiny</option>
     <option name="charting.drilldown">none</option>
     <option name="charting.layout.splitSeries">0</option>
     <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
@@ -36,7 +35,6 @@
     <option name="charting.legend.mode">standard</option>
     <option name="charting.legend.placement">right</option>
     <option name="charting.lineWidth">2</option>
-    <option name="height">378</option>
     <option name="refresh.display">progressbar</option>
     <option name="trellis.enabled">0</option>
     <option name="trellis.scales.shared">1</option>

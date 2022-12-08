@@ -1,0 +1,18 @@
+<panel>
+  <title>Top 15 Streamed Artists by Total Time Listened</title>
+  <table>
+    <search>
+      <query>|inputlookup livestreams.csv |fields length,artist | convert dur2sec(length) as stream_length | stats sum(stream_length) as time_streamed by artist | sort -time_streamed limit=15 |eval to_be_minutes=time_streamed%3600 , hours=floor(time_streamed/3600) | eval minutes=round(to_be_minutes/60) | eval total_time_listened=hours." hours, ".minutes." minutes" | fields artist total_time_listened</query>
+      <earliest>-4mon</earliest>
+      <latest>now</latest>
+      <sampleRatio>1</sampleRatio>
+    </search>
+    <option name="count">20</option>
+    <option name="dataOverlayMode">none</option>
+    <option name="drilldown">none</option>
+    <option name="percentagesRow">false</option>
+    <option name="rowNumbers">false</option>
+    <option name="totalsRow">false</option>
+    <option name="wrap">true</option>
+  </table>
+</panel>
