@@ -27,8 +27,6 @@
   <collection label="WIP">
     <view name="music_wip"/>
     <view name="artist_analysis" />
-    <view name="mobile_music" />
-    <view name="wip_drilldown"/>
     <view name="year_music"/>
     <view name="ml_music"/>
     <view name="college_listening_diversity"/>
