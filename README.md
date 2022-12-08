@@ -100,7 +100,9 @@ To get listening data, you must be using Last.fm to track your listens across se
 ## Identify whether the app is working
 Different dashboards and panels depend on different types of information being available. Run the following search to identify the inline searches in the panels.
 
+```
 |rest /servicesNS/-/-/data/ui/views  splunk_server=local |table author eai:acl.app id eai:data title label|rex max_match=0 field=eai:data "\<query\>(?P<search_used>.*)\<\/query\>" |rename "eai:acl.app" as app_name |search search_used!="" app_name="music_app_for_splunk" |mvexpand search_used|fields - eai:data |table *
+```
 
 The searches that use an "itunes" macro rely only on iTunes library data. Those that rely on the concert or ticket lookup files will be apparent based on the searches used by the panels. 
 
@@ -122,6 +124,7 @@ The following are created by scheduled searches:
 * earliestlistensmbid.csv
 * earliesttracklistens.csv
 * headlinerthreshold.csv
+* itunestracklength.csv
 * openerthreshold.csv
 * track_release.csv
 * trackbpm.csv
