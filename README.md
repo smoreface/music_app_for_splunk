@@ -95,7 +95,9 @@ To add listen data or other library data, you must develop your own resources fo
 * Write a Spotify add-on for Splunk. I have barely started work on this.
 * Use online services to generate .csv files of events and upload those. This is relatively straightforward, and the best approach to get the data quickly, so long as you don't need it to be updated in real-time. Search "Spotify export" or "Last.fm export" to find services or scripts that do this for you. I don't endorse any particular options.
 
-To get listening data, you must be using Last.fm to track your listens across services, or do basic metrics using the play_count in iTunes data. Spotify does not make listening data available via API.
+To get listening data, you can use Last.fm to track your listens across services, do basic metrics using the play_count in iTunes data, collect data from the [Apple Music API](https://developer.apple.com/documentation/applemusicapi/get_recently_played_tracks) or the [Spotify API](https://developer.spotify.com/documentation/web-api/reference/#/operations/get-recently-played) get recently played tracks endpoints.
+
+This app uses a `lastfm` macro to collect and display listening data in the associated visualizations. 
 
 ## Identify whether the app is working
 Different dashboards and panels depend on different types of information being available. Run the following search to identify the inline searches in the panels.
